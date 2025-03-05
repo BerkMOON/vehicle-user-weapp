@@ -1,0 +1,128 @@
+.page {
+  background: #f5f5f5;
+  min-height: 100vh;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  height: 52px;
+  background: linear-gradient(to bottom, #009688, #4DB6AC);
+  
+  .service-btn {
+    background: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
+}
+
+.car-card {
+  margin: 20px;
+  height: 180px;
+  background: linear-gradient(to bottom, #009688, #4DB6AC);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .bind-car-btn {
+    background: #fff;
+    padding: 8px 24px;
+    border-radius: 20px;
+  }
+}
+
+.data-section {
+  background: #fff;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    
+    .more {
+      color: #999;
+    }
+  }
+  
+  .mileage {
+    margin: 20px 0;
+    
+    .number {
+      font-size: 32px;
+      font-weight: bold;
+    }
+    
+    .unit {
+      margin-left: 4px;
+      color: #666;
+    }
+    
+    .label {
+      display: block;
+      color: #999;
+      margin-top: 4px;
+    }
+  }
+  
+  .driving-info {
+    color: #999;
+    margin: 12px 0;
+    
+    .label {
+      margin-right: 20px;
+    }
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 20px;
+    
+    .stat-item {
+      text-align: center;
+      
+      .value {
+        font-size: 20px;
+        font-weight: bold;
+      }
+      
+      .label {
+        display: block;
+        color: #999;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      
+      .unit {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+  }
+}
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #fff;
+  padding: 10px 0;
+  
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    color: #999;
+    
+    &.active {
+      color: #009688;
+    }
+  }
+}

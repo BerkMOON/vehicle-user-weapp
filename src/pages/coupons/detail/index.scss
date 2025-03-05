@@ -1,0 +1,114 @@
+.coupon-detail {
+  padding: 16px;
+  min-height: 100vh;
+  background: #f5f6f7;
+
+  .detail-card {
+    background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+    border-radius: 12px;
+    padding: 24px;
+    color: #fff;
+    margin-bottom: 16px;
+
+    .amount-section {
+      text-align: center;
+      margin-bottom: 16px;
+
+      .currency {
+        font-size: 24px;
+        margin-right: 4px;
+      }
+
+      .amount {
+        font-size: 48px;
+        font-weight: bold;
+      }
+    }
+
+    .info-section {
+      text-align: center;
+
+      .type {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .desc {
+        font-size: 14px;
+        opacity: 0.8;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .status {
+        font-size: 12px;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .rules-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+
+    .card-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 16px;
+      padding-left: 8px;
+      border-left: 4px solid #4e54c8;
+    }
+
+    .rule-items {
+      .rule-item {
+        display: flex;
+        margin-bottom: 12px;
+        font-size: 14px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .label {
+          color: #666;
+          width: 100px;
+          flex-shrink: 0;
+        }
+
+        .value {
+          color: #333;
+          flex: 1;
+        }
+      }
+    }
+  }
+}
+
+.qrcode-section {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .qrcode-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .qrcode {
+    width: 150px;
+    height: 150px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}

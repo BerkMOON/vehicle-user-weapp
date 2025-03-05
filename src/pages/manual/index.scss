@@ -1,0 +1,43 @@
+.manual-page {
+  padding: 16px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.manual-header {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.manual-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.manual-content {
+  .nut-cell-group {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .nut-cell-group__title {
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .nut-cell {
+    padding: 12px 16px;
+    
+    .nut-cell__title {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+}

@@ -1,0 +1,114 @@
+.recorder-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .content-scroll {
+    height: calc(100vh - 88px); // 减去头部和标签页的高度
+    ::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      color: transparent;
+    }
+
+    &.has-bottom-bar {
+      height: calc(100vh - 88px - 100px);
+    }
+  }
+
+  .bottom-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: #fff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
+
+    .selected-count {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+    }
+
+    .download-btn {
+      background: #007AFF;
+      color: #fff;
+      font-size: 14px;
+      border-radius: 16px;
+      height: 32px;
+      line-height: 32px;
+      padding: 0 20px;
+    }
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 16px 16px;
+  background: #fff;
+
+  .back-icon {
+    font-size: 20px;
+    padding: 4px 12px;
+  }
+
+  .title {
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .right-buttons {
+    display: flex;
+    gap: 16px;
+
+    .refresh-btn,
+    .select-btn {
+      color: #333;
+      font-size: 14px;
+    }
+  }
+}
+
+.tab-nav {
+  display: flex;
+  background: #fff;
+  padding: 0 16px;
+  border-bottom: 1px solid #eee;
+
+  .tab-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #666;
+    position: relative;
+
+    &.active {
+      color: #4054b2;
+      font-weight: 500;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 16px;
+        right: 16px;
+        height: 2px;
+        background: #4054b2;
+        border-radius: 1px;
+      }
+    }
+  }
+}

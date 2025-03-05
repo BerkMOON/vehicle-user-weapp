@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "vehicle-user-weapp",
+  "description": "易达安用户小程序，用于设备用户在小程序上查看行车记录仪内容",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}

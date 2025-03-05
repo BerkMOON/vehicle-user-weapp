@@ -1,0 +1,96 @@
+.mine-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 0 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding-top: 16px;
+  
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    margin-right: 15px;
+  }
+  
+  .phone-number {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    
+    .arrow {
+      margin-left: 10px;
+      color: #999;
+    }
+  }
+}
+
+.section-title {
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.car-card {
+  background: linear-gradient(to bottom, #009688, #4DB6AC);
+  height: 160px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .bind-car-btn {
+    background: #fff;
+    padding: 8px 24px;
+    border-radius: 20px;
+  }
+}
+
+.menu-list {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 12px;
+  
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #f5f5f5;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .menu-item-left {
+      display: flex;
+      align-items: center;
+      
+      .menu-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        font-size: 12px;
+      }
+    }
+    
+    .arrow {
+      color: #999;
+    }
+  }
+}
+.qrcode-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  border-radius: 16px;
+
+  .qrcode-tip {
+    font-size: 14px;
+    color: #666;
+  }
+}
