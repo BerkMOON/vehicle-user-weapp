@@ -21,7 +21,7 @@ function Coupons() {
       page,
       limit: 10
     })
-    return res?.data.list || []
+    return res?.data?.list || []
   }
 
   const getRuleContent = (coupon: CouponInfo) => {

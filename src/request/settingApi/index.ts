@@ -101,4 +101,10 @@ export const SettingAPI = {
     property: 'Camera.Menu.Flip.Senor',
     value
   }),
+
+  // 获取固件版本
+  getFirmwareVersion: () => getRequestUrl({
+    action: 'get',
+    property: 'Camera.Menu.FWversion'
+  }),
 } 

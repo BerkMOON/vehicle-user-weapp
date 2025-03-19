@@ -10,6 +10,7 @@ declare module '*.less';
 declare module '*.scss';
 declare module '*.sass';
 declare module '*.styl';
+declare const TARO_APP_API_BASE_URL: string;
 
 declare namespace NodeJS {
   interface ProcessEnv {

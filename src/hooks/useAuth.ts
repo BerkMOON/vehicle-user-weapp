@@ -26,6 +26,7 @@ export const useAuth = () => {
       if (response?.header['Set-Cookie']) {
         Taro.setStorageSync('cookies', response?.header['Set-Cookie'])
       }
+      checkLoginStatus()
     } catch (error) {
       console.error('登录失败：', error)
     }

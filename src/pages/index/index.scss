@@ -1,128 +1,169 @@
 .page {
-  background: #f5f5f5;
   min-height: 100vh;
-  position: relative;
-}
+  background: #f5f7fa;
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  height: 52px;
-  background: linear-gradient(to bottom, #009688, #4DB6AC);
-  
-  .service-btn {
+  .header {
+    height: 52px;
+    padding: 20px;
+    background: linear-gradient(to bottom, #5c62d6, #4e54c8);
+  }
+
+  .device-section {
     background: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-  }
-}
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 16px 0 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
-.car-card {
-  margin: 20px;
-  height: 180px;
-  background: linear-gradient(to bottom, #009688, #4DB6AC);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .bind-car-btn {
-    background: #fff;
-    padding: 8px 24px;
-    border-radius: 20px;
-  }
-}
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f5f5f5;
 
-.data-section {
-  background: #fff;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 12px;
-  
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    
-    .more {
-      color: #999;
+      .title {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .add-btn {
+        padding: 6px 16px;
+        font-size: 14px;
+        color: #4e54c8;
+        background: rgba(78, 84, 200, 0.1);
+        border: none;
+        border-radius: 6px;
+        margin: 0;
+      }
     }
-  }
-  
-  .mileage {
-    margin: 20px 0;
-    
-    .number {
-      font-size: 32px;
-      font-weight: bold;
-    }
-    
-    .unit {
-      margin-left: 4px;
-      color: #666;
-    }
-    
-    .label {
-      display: block;
-      color: #999;
-      margin-top: 4px;
-    }
-  }
-  
-  .driving-info {
-    color: #999;
-    margin: 12px 0;
-    
-    .label {
-      margin-right: 20px;
-    }
-  }
-  
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    margin-top: 20px;
-    
-    .stat-item {
+
+    .empty-state {
+      padding: 40px 0;
       text-align: center;
-      
-      .value {
-        font-size: 20px;
-        font-weight: bold;
-      }
-      
-      .label {
-        display: block;
+
+      .empty-text {
         color: #999;
-        font-size: 12px;
-        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 16px;
       }
-      
-      .unit {
-        font-size: 12px;
-        color: #999;
+
+      .login-btn,
+      .bind-btn {
+        width: 60%;
+        background: #4e54c8;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
       }
+    }
+
+    .device-list {
+      .device-item {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .device-info {
+          margin-bottom: 12px;
+
+          .device-id {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 6px;
+            font-weight: 500;
+          }
+
+          .vin {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+          }
+        }
+
+        .device-actions {
+          display: flex;
+          gap: 8px;
+
+          .action-btn,
+          .unbind-btn {
+            flex: 1;
+            height: 32px;
+            line-height: 32px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+          }
+
+          .action-btn {
+            color: #4e54c8;
+            background: rgba(78, 84, 200, 0.1);
+
+            &[disabled] {
+              opacity: 0.5;
+              background: #ccc;
+              color: #666;
+            }
+          }
+
+          .unbind-btn {
+            color: #ff4d4f;
+            background: rgba(255, 77, 79, 0.1);
+          }
+        }
+      }
+    }
+  }
+
+  .manual-card {
+    margin: 16px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    .manual-title {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .manual-desc {
+      font-size: 12px;
+      color: #999;
     }
   }
 }
 
-.tab-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  background: #fff;
-  padding: 10px 0;
+.connect-status {
+  margin-top: 8px;
   
-  .tab-item {
-    flex: 1;
-    text-align: center;
-    color: #999;
-    
-    &.active {
-      color: #009688;
+  .connected {
+    color: #009688;
+    font-size: 14px;
+  }
+
+  .connect-btn {
+    font-size: 14px;
+    padding: 4px 12px;
+    line-height: 1.4;
+    background: #4e54c8;
+    color: #fff;
+    border-radius: 4px;
+
+    &[disabled] {
+      opacity: 0.6;
+      background: #ccc;
     }
   }
 }

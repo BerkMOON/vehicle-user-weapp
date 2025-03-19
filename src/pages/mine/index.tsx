@@ -1,15 +1,15 @@
 import { View, Text, Image, Canvas } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
-import { ArrowSize8, Receipt, Voucher, QrCode } from '@nutui/icons-react-taro'
-import { Popup } from '@nutui/nutui-react-taro'
+import { ArrowSize8, Receipt, Voucher, QrCode, User } from '@nutui/icons-react-taro'
+import { Avatar, Popup } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useUserStore } from '@/store/user'
 import drawQrcode from 'weapp-qrcode'
 import { useRef } from 'react'
 
 function Mine() {
-  const { userInfo: { openId } } = useUserStore()
+  const { userInfo: { openId, phone } } = useUserStore()
   const [showQRCode, setShowQRCode] = useState(false)
   const componentRef = useRef()
 
@@ -37,24 +37,26 @@ function Mine() {
     <View className="mine-page" ref={componentRef}>
       {/* 用户信息 */}
       <View className="user-info">
-        <Image
+        <Avatar
           className="avatar"
-          src="/assets/default-avatar.png"
+          icon={<User color="#333" />}
+          background="#f0f0f0"
+          size="large"
         />
         <View className="phone-number">
-          156****7610
+          {phone}
         </View>
       </View>
 
       {/* 我的车辆 */}
-      <View className="section-title">我的车辆</View>
+      {/* <View className="section-title">我的车辆</View>
       <View className="car-card">
         <View className="bind-car-btn" onClick={() => {
           Taro.navigateTo({
             url: '/pages/bind-car/index'
           })
         }}>+ 绑定车辆</View>
-      </View>
+      </View> */}
 
       {/* 菜单列表 */}
       <View className="menu-list">

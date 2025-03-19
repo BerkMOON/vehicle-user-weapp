@@ -3,6 +3,7 @@ import { LoginParams, UserInfo } from "./typings"
 import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
 
+const prefix = TARO_APP_API_BASE_URL + '/api/consumer/wx'
 
 export const UserAPI = {
 
@@ -13,7 +14,7 @@ export const UserAPI = {
    *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259941820
    */
   getUserInfo: () => getRequest<ResponseInfoType<UserInfo>>({
-    url: 'http://47.121.134.143:8890/api/consumer/wx/getSelfInfo',
+    url: `${prefix}/getSelfInfo`,
   }),
 
   /**
@@ -23,7 +24,7 @@ export const UserAPI = {
    *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259924536
   */
   login: (params: LoginParams) => Taro.request<ResponseInfoType<null>>({
-    url: 'http://47.121.134.143:8890/api/consumer/wx/login',
+    url: `${prefix}/login`,
     method: 'POST',
     data: params,
   }),
@@ -35,7 +36,7 @@ export const UserAPI = {
    *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259939104
    */
   setPhone: (params: { code: string }) => postRequest<ResponseInfoType<null>>({
-    url: 'http://47.121.134.143:8890/api/consumer/wx/getPhone',
+    url: `${prefix}/getPhone`,
     params: params,
   }),
 } 

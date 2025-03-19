@@ -2,13 +2,35 @@ import { View } from '@tarojs/components'
 import { Form, Input, Button } from '@nutui/nutui-react-taro'
 import { Scan } from '@nutui/icons-react-taro'
 import './index.scss'
-import Taro from '@tarojs/taro'
+import Taro, { useRouter } from '@tarojs/taro'
+import { DeviceAPI } from '@/request/deviceApi'
+import { SuccessCode } from '@/constants/constants'
+import { useUserStore } from '@/store/user'
+import { useAuth } from '@/hooks/useAuth'
+import { useEffect } from 'react'
 
 function BindCar() {
+  const router = useRouter()
   const [form] = Form.useForm()
 
+  const { userInfo: { phone } } = useUserStore()
+  const { handleGetPhoneNumber } = useAuth()
+
+  const getPhoneNumber = async (e) => {
+    await handleGetPhoneNumber(e.detail.code)
+  }
+
+  useEffect(() => {
+    // 处理页面参数
+    if (router.params.sn) {
+      form.setFieldsValue({
+        sn: router.params.sn
+      })
+    }
+  }, [router.params.sn])
+
   // 处理图像识别
-  const handleOCR = async (fieldName: string) => {
+  const handleOCR = async () => {
     try {
       // 选择图片
       const { tempFilePaths } = await Taro.chooseImage({
@@ -23,7 +45,6 @@ function BindCar() {
         service: 'wx79ac3de8be320b71', // 通用印刷体识别
         api: 'OcrAllInOne',
         data: {
-          // img_url: tempFilePaths[0],
           //@ts-ignore
           img_url: new Taro.serviceMarket.CDN({
             type: 'filePath',
@@ -39,7 +60,7 @@ function BindCar() {
         const text = result?.data?.driving_res?.vin?.text
         console.log('识别结果：', text)
         form.setFieldsValue({
-          [fieldName]: text
+          vin: text
         })
       } else {
         Taro.showToast({
@@ -56,76 +77,95 @@ function BindCar() {
     }
   }
 
-  const onSubmit = (values) => {
-    console.log('form values:', values)
-    // TODO: 调用绑定车辆接口
-    Taro.showToast({
-      title: '绑定成功',
-      icon: 'success',
-      duration: 2000
-    }).then(() => {
-      // 返回上一页
-      setTimeout(() => {
-        Taro.navigateBack()
-      }, 2000)
+  const handleScan = async () => {
+    try {
+      const res = await Taro.scanCode({
+        onlyFromCamera: false,
+        scanType: ['qrCode']
+      })
+
+      if (res.result) {
+        console.log('扫描结果：', res.result)
+        form.setFieldsValue({
+          sn: res.result
+        })
+      } else {
+        Taro.showToast({
+          title: '未获取到用户信息',
+          icon: 'none'
+        })
+      }
+    } catch (error) {
+      console.error('扫码失败：', error)
+      Taro.showToast({
+        title: '扫码失败',
+        icon: 'error'
+      })
+    }
+  }
+
+  const onSubmit = async (values) => {
+    const res = await DeviceAPI.bind({
+      ...values
     })
+
+    if (res?.response_status.code === SuccessCode) {
+      Taro.showToast({
+        title: '绑定成功',
+        icon: 'success',
+        duration: 1000
+      }).then(() => {
+        // 返回上一页
+        setTimeout(() => {
+          Taro.reLaunch({
+            url: '/pages/index/index'
+          })
+        }, 1000)
+      })
+    } else {
+      Taro.showToast({
+        title: res?.response_status?.msg || '绑定失败',
+        icon: 'error'
+      })
+    }
   }
 
   return (
     <View className="bind-car-page">
       <Form form={form} onFinish={onSubmit} divider>
-        <Form.Item
-          label="车牌号码"
-          name="plateNumber"
-          required
-          rules={[{ required: true, message: '请输入车牌号码' }]}
-        >
-          <Input
-            className="form-input"
-            placeholder="请输入车牌号码"
-            type="text"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="记录仪SIN号"
-          name="sinNumber"
-          required
-          rules={[{ required: true, message: '请输入记录仪SIN号' }]}
-        >
-          <View className="input-with-actions">
+        <View className="input-with-actions">
+          <Form.Item
+            label="记录仪SIN号"
+            name="sn"
+            required
+            rules={[{ required: true, message: '请输入记录仪SIN号' }]}
+          >
             <Input
               className="form-input"
               placeholder="请输入记录仪SIN号"
               type="text"
             />
-            <Button
-              className="action-button"
-              type="primary"
-              onClick={() => handleOCR('sinNumber')}
-            >
-              <Scan />
-            </Button>
-          </View>
-        </Form.Item>
+          </Form.Item>
+          <Scan onClick={handleScan} />
+        </View>
 
-        <Form.Item
-          label="车架号"
-          name="vinNumber"
-          required
-          rules={[{ required: true, message: '请输入车架号' }]}
-        >
-          <View className="input-with-actions">
+        <View className="input-with-actions">
+          <Form.Item
+            label="车架号"
+            name="vin"
+            required
+            rules={[{ required: true, message: '请输入车架号' }]}
+          >
             <Input
               className="form-input"
               placeholder="请输入车架号"
               type="text"
             />
-            <Scan onClick={() => handleOCR('vinNumber')} />
-          </View>
-        </Form.Item>
+          </Form.Item>
+          <Scan onClick={handleOCR} />
+        </View>
 
-        <Form.Item
+        {/* <Form.Item
           label="手机号码"
           name="phoneNumber"
           required
@@ -139,25 +179,16 @@ function BindCar() {
             placeholder="请输入手机号码"
             type="number"
           />
-        </Form.Item>
-
-        <Form.Item
-          label="车主姓名"
-          name="ownerName"
-          required
-          rules={[{ required: true, message: '请输入车主姓名' }]}
-        >
-          <Input
-            className="form-input"
-            placeholder="请输入车主姓名"
-            type="text"
-          />
-        </Form.Item>
+        </Form.Item> */}
 
         <View className="form-actions">
-          <Button block type="primary" formType="submit">
-            提交
-          </Button>
+          {
+            !phone ? <Button block color="#4e54c8" openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>
+              登录获取手机号
+            </Button> : <Button block color="#4e54c8" formType="submit">
+              绑定
+            </Button>
+          }
         </View>
       </Form>
     </View>

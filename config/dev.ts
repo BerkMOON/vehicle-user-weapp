@@ -3,6 +3,7 @@ module.exports = {
     NODE_ENV: '"development"'
   },
   defineConstants: {
+    TARO_APP_API_BASE_URL: '"http://47.121.134.143:8890"'
   },
   mini: {
     devServer: {
@@ -12,7 +13,7 @@ module.exports = {
           changeOrigin: true,
           pathRewrite: {
             // 将 /api 替换为空字符串，即去掉请求路径中的 /api
-            '^/api': '' 
+            '^/api': ''
           }
         }
       }

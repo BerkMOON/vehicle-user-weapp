@@ -22,7 +22,7 @@ export default defineAppConfig({
   tabBar: {
     custom: false,
     color: '#999999',
-    selectedColor: '#009688',
+    selectedColor: '#4e54c8',
     backgroundColor: '#ffffff',
     list: [
       {
@@ -34,14 +34,14 @@ export default defineAppConfig({
       {
         pagePath: 'pages/cloud-album/index',
         text: '云相册',
-        iconPath: './assets/tabbar/home.png',
-        selectedIconPath: './assets/tabbar/home-active.png'
+        iconPath: './assets/tabbar/folder.png',
+        selectedIconPath: './assets/tabbar/folder-active.png'
       },
       {
         pagePath: 'pages/mine/index',
         text: '我的',
-        iconPath: './assets/tabbar/profile.png',
-        selectedIconPath: './assets/tabbar/profile-active.png'
+        iconPath: './assets/tabbar/user.png',
+        selectedIconPath: './assets/tabbar/user-active.png'
       }
     ]
   },

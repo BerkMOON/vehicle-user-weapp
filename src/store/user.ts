@@ -40,14 +40,14 @@ export const useUserStore = create<UserState>((set) => ({
     phone: '',
     openId: '',
   },
-  isLogin: true,
+  isLogin: false,
 
   initializeFromStorage: async () => {
     const savedUserInfo = await loadFromStorage()
     if (savedUserInfo) {
       set({ 
         userInfo: savedUserInfo,
-        isLogin: true
+        isLogin: !!savedUserInfo.phone
       })
     }
   },
@@ -55,7 +55,7 @@ export const useUserStore = create<UserState>((set) => ({
   setUserInfo: (info) => {
     set({ 
       userInfo: info,
-      isLogin: true
+      isLogin: !!info.phone
     })
     saveToStorage(info)
   },

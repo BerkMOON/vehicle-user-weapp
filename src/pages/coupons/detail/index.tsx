@@ -59,9 +59,9 @@ function CouponDetail() {
     if (!id) return
     setLoading(true)
     try {
-      const res = await CouponAPI.getCouponList({ id: Number(id) })
-      if (res?.data.list?.[0]) {
-        setCouponDetail(res.data.list[0])
+      const res = await CouponAPI.getCouponDetail(Number(id))
+      if (res?.data) {
+        setCouponDetail(res.data)
       }
     } catch (error) {
       Taro.showToast({

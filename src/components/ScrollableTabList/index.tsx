@@ -1,6 +1,7 @@
 import { ScrollView, View } from '@tarojs/components'
 import { Empty, Skeleton, Tabs } from '@nutui/nutui-react-taro'
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
+import emptyImg from '@/assets/empty.png'
 import './index.scss'
 
 export interface TabItem {
@@ -112,7 +113,7 @@ const ScrollableTabList = forwardRef(<T,>(props: ScrollableTabListProps<T>, ref)
             <View className='scroll-view-content'>
               <Skeleton rows={10} title animated visible={!isSkeletonShow}>
                 {dataMap[activeTab]?.length === 0 ? (
-                  <Empty description={emptyText} />
+                  <Empty description={emptyText} image={emptyImg} />
                 ) : (
                   <>
                     {dataMap[activeTab]?.map(renderItem)}

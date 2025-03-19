@@ -1,13 +1,16 @@
 .mine-page {
   min-height: 100vh;
   background: #f5f5f5;
-  padding: 0 20px;
+  padding: 16px 20px;
+  box-sizing: border-box;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  padding-top: 16px;
+  padding: 12px;
+  background-color: #fff;
+  border-radius: 12px;
   
   .avatar {
     width: 60px;
@@ -32,21 +35,6 @@
 .section-title {
   font-size: 16px;
   margin: 20px 0;
-}
-
-.car-card {
-  background: linear-gradient(to bottom, #009688, #4DB6AC);
-  height: 160px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  .bind-car-btn {
-    background: #fff;
-    padding: 8px 24px;
-    border-radius: 20px;
-  }
 }
 
 .menu-list {

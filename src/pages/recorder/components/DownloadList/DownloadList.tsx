@@ -2,7 +2,8 @@ import { View, Text, Button } from '@tarojs/components'
 import { DownloadItem } from '../../types'
 import './DownloadList.scss'
 import Taro from '@tarojs/taro'
-import { NoticeBar } from '@nutui/nutui-react-taro'
+import { Empty, NoticeBar } from '@nutui/nutui-react-taro'
+import emptyImg from '@/assets/empty.png'
 
 interface DownloadListProps {
   downloadList: DownloadItem[]
@@ -35,9 +36,7 @@ export const DownloadList: React.FC<DownloadListProps> = ({ downloadList, onCanc
       <NoticeBar className='notice-bar' content={'请在下载时保持wifi连接，在保存到手机相册前, 关闭wifi, 连接流量, 以保持能力可用'} scrollable={true} />
       <View className="download-list">
         {downloadList.length === 0 ? (
-          <View className="empty-state">
-            <Text>暂无下载内容</Text>
-          </View>
+          <Empty description="暂无下载内容" image={emptyImg} />
         ) : (
           downloadList.map(item => (
             <View key={item.name} className="download-item">

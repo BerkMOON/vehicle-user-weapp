@@ -4,6 +4,8 @@ import { useReachBottom } from '@tarojs/taro'
 import './index.less'
 import { CloudAPI } from '@/request/cloudApi'
 import { Photos } from '@/request/cloudApi/typings'
+import { Empty } from '@nutui/nutui-react-taro'
+import emptyImg from '@/assets/empty.png'
 
 export default function CloudAlbum() {
   const [photos, setPhotos] = useState<Photos[]>([])
@@ -22,7 +24,7 @@ export default function CloudAlbum() {
         limit: pageSize,
       })
 
-      const newPhotos = res?.data.photos || []
+      const newPhotos = res?.data?.photos || []
       if (newPhotos.length < pageSize) {
         setHasMore(false)
       }
@@ -49,6 +51,13 @@ export default function CloudAlbum() {
 
   return (
     <View className='cloud-album'>
+      {photos.length === 0 && (
+        <Empty
+          className='empty'
+          description='暂无照片'
+          image={emptyImg}
+        />
+      )}
       <View className='photo-grid'>
         {photos.map(photo => (
           <View key={photo.id} className='photo-item'>

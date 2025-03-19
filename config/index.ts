@@ -30,6 +30,9 @@ const config = {
     prebundle: { enable: false }
   },
   mini: {
+    miniCssExtractPluginOption: {
+      ignoreOrder: true,
+    },
     alias: {
       '@/components': path.resolve(__dirname, '..', 'src/components'),
       '@/utils': path.resolve(__dirname, '..', 'src/utils'),
@@ -40,6 +43,7 @@ const config = {
       '@/pages': path.resolve(__dirname, '..', 'src/pages'),
       '@/request': path.resolve(__dirname, '..', 'src/request'),
       '@/hooks': path.resolve(__dirname, '..','src/hooks'),
+      '@/assets': path.resolve(__dirname, '..','src/assets')
     },
     postcss: {
       pxtransform: {
