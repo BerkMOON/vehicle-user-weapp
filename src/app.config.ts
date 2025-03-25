@@ -11,7 +11,8 @@ export default defineAppConfig({
     'pages/coupons/index',
     'pages/coupons/detail/index',
     'pages/bind-car/index',
-    'pages/cloud-album/index'  // 添加云相册页面
+    'pages/cloud-album/index',  // 添加云相册页面
+    'pages/terms/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -22,7 +23,7 @@ export default defineAppConfig({
   tabBar: {
     custom: false,
     color: '#999999',
-    selectedColor: '#4e54c8',
+    selectedColor: '#2193B0',
     backgroundColor: '#ffffff',
     list: [
       {
@@ -46,6 +47,9 @@ export default defineAppConfig({
     ]
   },
   permission: {
+    'scope.userLocation': {
+      desc: '你的位置信息将用于小程序位置接口的效果展示',
+    },
     "scope.writePhotosAlbum": {
       "desc": "保存文件到相册"
     },

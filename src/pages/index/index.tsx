@@ -3,21 +3,21 @@ import './index.scss'
 import Taro from '@tarojs/taro'
 import { useEffect, useState, useRef } from 'react'  // 添加 useRef
 import { useUserStore } from '@/store/user'
-import { useAuth } from '@/hooks/useAuth'
 import { DeviceAPI } from '@/request/deviceApi'
 import { DeviceInfo } from '@/request/deviceApi/typings.d'
 import { Computer } from '@nutui/icons-react-taro'
 import { SettingAPI } from '@/request/settingApi'
 import { handleRequest } from '@/request'
-import { Empty } from '@nutui/nutui-react-taro'
+import { Dialog, Empty } from '@nutui/nutui-react-taro'
 import emptyImg from '@/assets/empty.png'
+import LoginPopup from '@/components/LoginPopup'
 
 function Index() {
   const { isLogin } = useUserStore()
-  const { handleGetPhoneNumber } = useAuth()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
   const [connectDeivce, setConnectDevice] = useState(null)
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
+  const [showLogin, setShowLogin] = useState(false)
 
   const checkConnection = async () => {
     try {
@@ -25,14 +25,14 @@ function Index() {
         url: SettingAPI.getFirmwareVersion(),
         errorMsg: '',
         onSuccess: (data) => {
-          const versionMatch = data.match(/FWversion=(\w+)/)
+          const versionMatch = data.match(/Camera\.Menu\.FWversion=(.+)/)
           setConnectDevice(versionMatch[1])
           if (timerRef.current) {
             clearInterval(timerRef.current)
             timerRef.current = null
           }
           Taro.showToast({
-            title: '连接成功',
+            title: '设备已连接',
             icon: 'success'
           })
         }
@@ -42,20 +42,20 @@ function Index() {
     }
   }
 
-  const handleConnect = async () => {  
+  const handleConnect = async () => {
     try {
-      await Taro.showModal({
-        title: '连接设备',
-        content: '请将手机连接到设备的 WiFi，WiFi 名称通常以 "SG10" 开头, 密码为12345678',
-        confirmText: '去连接',
-        cancelText: '取消'
-      }).then(res => {
-        if (res.confirm) {
-          if (timerRef.current) {
-            clearInterval(timerRef.current)
+      Dialog.open('open_wifi', {
+        title: '连接设备WiFi',
+        onConfirm: () => {
+          const deviceInfo = Taro.getDeviceInfo()
+          if(deviceInfo.platform === 'android') {
+            connectWifi()
           }
-          timerRef.current = setInterval(() => checkConnection(), 2000)
-        }
+          Dialog.close('open_wifi')
+        },
+        onCancel: () => {
+          Dialog.close('open_wifi')
+        },
       })
     } catch (error) {
       Taro.showToast({
@@ -65,12 +65,48 @@ function Index() {
     }
   }
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
+  const connectWifi = () => {
+    Taro.startWifi({
+      success: function () {
+        Taro.connectWifi({
+          SSID: 'SG10_XXX',
+          password: '12345678',
+          maunal: true,
+        })
+      },
+      fail: function () {
+        Taro.showToast({
+          title: '开启 WiFi 失败',
+          icon: 'none'
+        })
       }
+    })
+  }
+
+  // 添加 WiFi 状态监听
+  useEffect(() => {
+    // 监听 WiFi 状态变化
+    Taro.onWifiConnected(function (res) {
+      if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
+        // 是目标设备的 WiFi，开始轮询
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+        }
+        timerRef.current = setInterval(() => checkConnection(), 2000)
+      }
+      if (!res.wifi || !res.wifi.SSID.startsWith('SG10')) {
+        // WiFi 断开或连接到其他网络，清除轮询
+        if (timerRef.current) {
+          clearInterval(timerRef.current)
+          timerRef.current = null
+        }
+        setConnectDevice(null)
+      }
+    })
+
+    return () => {
+      // 组件卸载时移除监听
+      Taro.offWifiConnected()
     }
   }, [])
 
@@ -79,23 +115,10 @@ function Index() {
       const res = await DeviceAPI.list()
       if (res?.data?.device_list) {
         setDeviceList(res.data.device_list)
-        // setDeviceList([{
-        //   sn:'xxxx',
-        //   device_id:'xxxx',
-        //   vin:'xxxx',
-        //   status: {
-        //     code: 1,
-        //     name: 'string',
-        //   }
-        // }])
       }
     } catch (error) {
       console.error('获取设备列表失败:', error)
     }
-  }
-
-  const getPhoneNumber = async (e) => {
-    await handleGetPhoneNumber(e.detail.code)
   }
 
 
@@ -148,17 +171,17 @@ function Index() {
 
         {!isLogin ? (
           <View className="empty-state">
+            <Empty description="暂无您的设备信息，请登录查看" image={emptyImg} />
             <Button
               className="login-btn"
-              openType='getPhoneNumber'
-              onGetPhoneNumber={getPhoneNumber}
+              onClick={() => setShowLogin(true)}
             >
-              登录获取手机号
+              立即登录
             </Button>
           </View>
         ) : deviceList.length === 0 ? (
           <View className="empty-state">
-            <Empty description="暂无设备" image={emptyImg}/>
+            <Empty description="暂无设备" image={emptyImg} />
             <Button
               className="bind-btn"
               onClick={() => Taro.navigateTo({ url: '/pages/bind-car/index' })}
@@ -174,7 +197,10 @@ function Index() {
                   <View className="device-id">设备号：{device.sn}</View>
                   <View className="vin">车架号：{device.vin}</View>
                   {
-                    connectDeivce && <View className="vin">固件版本号：{connectDeivce}</View>
+                    connectDeivce && <View className="vin">
+                      <View> 固件版本号：</View>
+                      <View>{connectDeivce}</View>
+                    </View>
                   }
                   <View className="connect-status">
                     {connectDeivce ? (
@@ -240,6 +266,31 @@ function Index() {
         <View className="manual-title">使用手册</View>
         <View className="manual-desc">了解记录仪使用方法</View>
       </View>
+
+      <LoginPopup
+        visible={showLogin}
+        onClose={() => setShowLogin(false)}
+      />
+
+      <Dialog id="open_wifi">
+        <>
+          <View className="dialog-content">
+            1.打开手机WiFi设置
+          </View>
+          <View className="dialog-content">
+            2.找到并连接名为"SG10_XXX"的WiFi
+          </View>
+          <View className="dialog-content">
+            3.输入WiFi密码：12345678
+          </View>
+          <View className="dialog-content">
+            4.等待WiFi连接成功
+          </View>
+          <View className="dialog-content">
+            5.返回小程序
+          </View>
+        </>
+      </Dialog>
     </View>
   )
 }

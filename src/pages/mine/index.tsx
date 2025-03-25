@@ -1,15 +1,17 @@
-import { View, Text, Image, Canvas } from '@tarojs/components'
+import { View, Text, Canvas } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
-import { ArrowSize8, Receipt, Voucher, QrCode, User } from '@nutui/icons-react-taro'
-import { Avatar, Popup } from '@nutui/nutui-react-taro'
+import { ArrowSize8, Receipt, Voucher, QrCode, User, ArrowExchange } from '@nutui/icons-react-taro'
+import { Avatar, Popup, Button } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useUserStore } from '@/store/user'
 import drawQrcode from 'weapp-qrcode'
 import { useRef } from 'react'
+import { useAuth } from '@/hooks/useAuth'  // 添加这行导入
 
 function Mine() {
   const { userInfo: { openId, phone } } = useUserStore()
+  const { handleGetPhoneNumber } = useAuth()  // 添加这行
   const [showQRCode, setShowQRCode] = useState(false)
   const componentRef = useRef()
 
@@ -33,31 +35,37 @@ function Mine() {
     }, 100)
   }
 
+  const getPhoneNumber = async (e) => {
+    await handleGetPhoneNumber(e.detail.code)
+  }
+
   return (
     <View className="mine-page" ref={componentRef}>
+      <View className='header'></View>
       {/* 用户信息 */}
       <View className="user-info">
-        <Avatar
-          className="avatar"
-          icon={<User color="#333" />}
-          background="#f0f0f0"
-          size="large"
-        />
-        <View className="phone-number">
-          {phone}
+        <View className="phone-info">
+          <Avatar
+            className="avatar"
+            icon={<User color="#333" />}
+            background="#f0f0f0"
+            size="large"
+          />
+          <View className="phone-number">
+            {phone ? phone : '未登录'}
+          </View>
         </View>
+        <Button
+          className="switch-account"
+          openType='getPhoneNumber'
+          onGetPhoneNumber={getPhoneNumber}
+          icon={<ArrowExchange size={14} />}
+        >
+          <Text>{phone ? '切换账号' : '立即登录'}</Text>
+        </Button>
       </View>
 
-      {/* 我的车辆 */}
-      {/* <View className="section-title">我的车辆</View>
-      <View className="car-card">
-        <View className="bind-car-btn" onClick={() => {
-          Taro.navigateTo({
-            url: '/pages/bind-car/index'
-          })
-        }}>+ 绑定车辆</View>
-      </View> */}
-
+      <View className="section-title">我的</View>
       {/* 菜单列表 */}
       <View className="menu-list">
         <View className="menu-item"
@@ -85,11 +93,29 @@ function Mine() {
             <ArrowSize8 size={14} />
           </Text>
         </View>
+      </View>
 
-        <View className="menu-item">
+      <View className="section-title">隐私政策</View>
+      {/* 菜单列表 */}
+      <View className="menu-list">
+        <View className="menu-item" onClick={() => {
+          Taro.navigateTo({ url: '/pages/terms/index?terms=privacy' })
+        }}>
           <View className="menu-item-left">
             <Receipt className="menu-icon" size={16} />
-            <Text>隐私政策</Text>
+            <Text>隐私协议</Text>
+          </View>
+          <Text className="arrow">
+            <ArrowSize8 size={14} />
+          </Text>
+        </View>
+
+        <View className="menu-item" onClick={() => {
+          Taro.navigateTo({ url: '/pages/terms/index?terms=trem', })
+        }}>
+          <View className="menu-item-left">
+            <Receipt className="menu-icon" size={16} />
+            <Text>用户协议</Text>
           </View>
           <Text className="arrow">
             <ArrowSize8 size={14} />

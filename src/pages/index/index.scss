@@ -1,11 +1,12 @@
 .page {
   min-height: 100vh;
   background: #f5f7fa;
+  padding-bottom: 20px;
 
   .header {
     height: 52px;
     padding: 20px;
-    background: linear-gradient(to bottom, #5c62d6, #4e54c8);
+    background: linear-gradient(to bottom, rgb(33, 147, 176), rgb(109, 213, 237));
   }
 
   .device-section {
@@ -34,7 +35,7 @@
       .add-btn {
         padding: 6px 16px;
         font-size: 14px;
-        color: #4e54c8;
+        color: #2193B0;
         background: rgba(78, 84, 200, 0.1);
         border: none;
         border-radius: 6px;
@@ -55,7 +56,7 @@
       .login-btn,
       .bind-btn {
         width: 60%;
-        background: #4e54c8;
+        background: #2193B0;
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -106,7 +107,7 @@
           }
 
           .action-btn {
-            color: #4e54c8;
+            color: #2193B0;
             background: rgba(78, 84, 200, 0.1);
 
             &[disabled] {
@@ -157,7 +158,7 @@
     font-size: 14px;
     padding: 4px 12px;
     line-height: 1.4;
-    background: #4e54c8;
+    background: #2193B0;
     color: #fff;
     border-radius: 4px;
 

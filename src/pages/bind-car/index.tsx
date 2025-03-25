@@ -32,6 +32,11 @@ function BindCar() {
   // 处理图像识别
   const handleOCR = async () => {
     try {
+      // 先让用户选择识别类型
+      const { tapIndex } = await Taro.showActionSheet({
+        itemList: ['识别驾驶证', '识别车架号铭牌']
+      })
+
       // 选择图片
       const { tempFilePaths } = await Taro.chooseImage({
         count: 1,
@@ -39,10 +44,14 @@ function BindCar() {
         sourceType: ['camera', 'album']
       })
 
+      Taro.showLoading({
+        title: '识别中...',
+      })
+
       // 调用OCR识别
       //@ts-ignore
       const result = await Taro.serviceMarket.invokeService({
-        service: 'wx79ac3de8be320b71', // 通用印刷体识别
+        service: 'wx79ac3de8be320b71',
         api: 'OcrAllInOne',
         data: {
           //@ts-ignore
@@ -51,18 +60,30 @@ function BindCar() {
             filePath: tempFilePaths[0],
           }),
           data_type: 3,
-          ocr_type: 3
+          ocr_type: tapIndex === 0 ? 3 : 8  // 根据选择设置不同的识别类型
         }
       })
 
-      // 解析结果并填充表单
-      if (result?.data?.driving_res?.vin?.text) {
-        const text = result?.data?.driving_res?.vin?.text
-        console.log('识别结果：', text)
-        form.setFieldsValue({
-          vin: text
-        })
+      let vinNumber = ''
+      if (tapIndex === 0) {
+        // 驾驶证识别结果处理
+        vinNumber = result?.data?.driving_res?.vin?.text
       } else {
+        // 车架号铭牌识别结果处理
+        const items = result?.data?.ocr_comm_res?.items || []
+        const vinItem = items.find(item => item.text.startsWith('L'))
+        vinNumber = vinItem?.text
+      }
+
+      if (vinNumber) {
+        console.log('识别结果：', vinNumber)
+        form.setFieldsValue({
+          vin: vinNumber
+        })
+        form.validateFields(['vin'])
+        Taro.hideLoading()
+      } else {
+        Taro.hideLoading()
         Taro.showToast({
           title: '未识别到有效信息',
           icon: 'none'
@@ -70,6 +91,7 @@ function BindCar() {
       }
     } catch (error) {
       console.error('识别失败error.message：', error.message)
+      Taro.hideLoading()
       Taro.showToast({
         title: '识别失败',
         icon: 'error'
@@ -81,7 +103,7 @@ function BindCar() {
     try {
       const res = await Taro.scanCode({
         onlyFromCamera: false,
-        scanType: ['qrCode']
+        scanType: ['qrCode', 'barCode']
       })
 
       if (res.result) {
@@ -89,6 +111,7 @@ function BindCar() {
         form.setFieldsValue({
           sn: res.result
         })
+        form.validateFields(['sn'])
       } else {
         Taro.showToast({
           title: '未获取到用户信息',
@@ -144,6 +167,7 @@ function BindCar() {
               className="form-input"
               placeholder="请输入记录仪SIN号"
               type="text"
+              clearable
             />
           </Form.Item>
           <Scan onClick={handleScan} />
@@ -160,32 +184,17 @@ function BindCar() {
               className="form-input"
               placeholder="请输入车架号"
               type="text"
+              clearable
             />
           </Form.Item>
           <Scan onClick={handleOCR} />
         </View>
 
-        {/* <Form.Item
-          label="手机号码"
-          name="phoneNumber"
-          required
-          rules={[
-            { required: true, message: '请输入手机号码' },
-            { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码' }
-          ]}
-        >
-          <Input
-            className="form-input"
-            placeholder="请输入手机号码"
-            type="number"
-          />
-        </Form.Item> */}
-
         <View className="form-actions">
           {
-            !phone ? <Button block color="#4e54c8" openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>
+            !phone ? <Button block color="#2193B0" openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>
               登录获取手机号
-            </Button> : <Button block color="#4e54c8" formType="submit">
+            </Button> : <Button block color="#2193B0" formType="submit">
               绑定
             </Button>
           }

@@ -66,6 +66,10 @@ const config = {
         }
       }
     },
+    optimizeMainPackage: {
+      enable: true,
+      exclude: ['@nutui/nutui-react-taro']
+    }
   },
   h5: {
     publicPath: '/',

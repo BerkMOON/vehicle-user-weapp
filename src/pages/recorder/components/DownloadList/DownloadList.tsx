@@ -11,6 +11,7 @@ interface DownloadListProps {
 }
 
 export const DownloadList: React.FC<DownloadListProps> = ({ downloadList, onCancel }) => {
+  const deviceInfo = Taro.getDeviceInfo()
 
   const handleDownload = (item: DownloadItem) => {
     try {
@@ -33,6 +34,9 @@ export const DownloadList: React.FC<DownloadListProps> = ({ downloadList, onCanc
 
   return (
     <>
+      {
+        deviceInfo.platform === 'ios' ? <NoticeBar className="notice-bar" content={'ios系统无法连接下载时，请将进入设置 -> APP -> 微信 -> 本地网络设置进行打开'} scrollable={true} /> : null
+      }
       <NoticeBar className='notice-bar' content={'请在下载时保持wifi连接，在保存到手机相册前, 关闭wifi, 连接流量, 以保持能力可用'} scrollable={true} />
       <View className="download-list">
         {downloadList.length === 0 ? (

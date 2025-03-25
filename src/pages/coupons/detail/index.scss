@@ -4,7 +4,7 @@
   background: #f5f6f7;
 
   .detail-card {
-    background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+    background: linear-gradient(to bottom, rgb(33, 147, 176), rgb(109, 213, 237));
     border-radius: 12px;
     padding: 24px;
     color: #fff;
@@ -60,7 +60,7 @@
       color: #333;
       margin-bottom: 16px;
       padding-left: 8px;
-      border-left: 4px solid #4e54c8;
+      border-left: 4px solid #2193B0;
     }
 
     .rule-items {

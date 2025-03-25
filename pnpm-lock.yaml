@@ -15,8 +15,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@nutui/nutui-react-taro':
-        specifier: ^2.3.10
-        version: 2.7.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^2.7.9
+        version: 2.7.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tarojs/components':
         specifier: 3.6.32
         version: 3.6.32(@tarojs/helper@3.6.32)(@tarojs/runtime@3.6.32(@tarojs/shared@3.6.32))(@tarojs/shared@3.6.32)(@types/react@18.3.18)(postcss@8.4.49)(react@18.3.1)
@@ -156,6 +156,9 @@ importers:
       postcss:
         specifier: ^8.4.18
         version: 8.4.49
+      raw-loader:
+        specifier: ^4.0.2
+        version: 4.0.2(webpack@5.97.1(@swc/core@1.3.96))
       style-loader:
         specifier: 1.3.0
         version: 1.3.0(webpack@5.97.1(@swc/core@1.3.96))
@@ -1129,8 +1132,8 @@ packages:
   '@nutui/jdesign-icons-react-taro@1.0.6-beta.2':
     resolution: {integrity: sha512-2Scz5c9o14gA7Mw5JdiEkc/KEbNlNWMcJMuqVyFVipYeeYN/118N/fvHVpocmJviN0Gc4P+u3ZB3dIQSA2j4Fw==}
 
-  '@nutui/nutui-react-taro@2.7.5':
-    resolution: {integrity: sha512-dyxsGsZ8WE7sWOCYNz/QGhOmoidAQxPJXHO7Tt2/DR2S/6ivyIckDJHyBgB4F3paEo5AKRbsC/Yb56K45ln+Qg==}
+  '@nutui/nutui-react-taro@2.7.10':
+    resolution: {integrity: sha512-gKmrp45OkJMteCqD2jtFITmkJK4jazuhnIjAZK3lQ/w4e1x7kP1Xwqhj6YnNM/I0PvJ5D5Ddr4KDjmktuUp7xg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
@@ -4622,6 +4625,7 @@ packages:
 
   lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
   lodash.kebabcase@4.1.1:
     resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
@@ -5611,6 +5615,12 @@ packages:
   raw-body@2.5.2:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
+
+  raw-loader@4.0.2:
+    resolution: {integrity: sha512-ZnScIV3ag9A4wPX/ZayxL/jZH+euYb6FcUinPcgiQW0+UBtEv0O6Q3lGd3cqJ+GHH+rksEv3Pj99oxJ3u3VIKA==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
 
   rc-config-loader@4.1.3:
     resolution: {integrity: sha512-kD7FqML7l800i6pS6pvLyIE2ncbk9Du8Q0gp/4hMPhJU6ZxApkoLcGD8ZeqgiAlfwZ6BlETq6qqe+12DUL207w==}
@@ -7976,7 +7986,7 @@ snapshots:
 
   '@nutui/jdesign-icons-react-taro@1.0.6-beta.2': {}
 
-  '@nutui/nutui-react-taro@2.7.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@nutui/nutui-react-taro@2.7.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.26.0
       '@nutui/icons-react-taro': 1.0.5
@@ -13145,6 +13155,12 @@ snapshots:
       http-errors: 2.0.0
       iconv-lite: 0.4.24
       unpipe: 1.0.0
+
+  raw-loader@4.0.2(webpack@5.97.1(@swc/core@1.3.96)):
+    dependencies:
+      loader-utils: 2.0.4
+      schema-utils: 3.3.0
+      webpack: 5.97.1(@swc/core@1.3.96)
 
   rc-config-loader@4.1.3:
     dependencies:
