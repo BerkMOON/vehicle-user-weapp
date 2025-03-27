@@ -8,16 +8,17 @@ import { DeviceInfo } from '@/request/deviceApi/typings.d'
 import { Computer } from '@nutui/icons-react-taro'
 import { SettingAPI } from '@/request/settingApi'
 import { handleRequest } from '@/request'
-import { Dialog, Empty } from '@nutui/nutui-react-taro'
+import { Dialog, Empty, Loading } from '@nutui/nutui-react-taro'
 import emptyImg from '@/assets/empty.png'
-import LoginPopup from '@/components/LoginPopup'
+import NotLogin from '@/components/NotLogin'
+import NotBind from '@/components/NotBind'
 
 function Index() {
   const { isLogin } = useUserStore()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
   const [connectDeivce, setConnectDevice] = useState(null)
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
-  const [showLogin, setShowLogin] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const checkConnection = async () => {
     try {
@@ -48,7 +49,7 @@ function Index() {
         title: '连接设备WiFi',
         onConfirm: () => {
           const deviceInfo = Taro.getDeviceInfo()
-          if(deviceInfo.platform === 'android') {
+          if (deviceInfo.platform === 'android') {
             connectWifi()
           }
           Dialog.close('open_wifi')
@@ -112,12 +113,15 @@ function Index() {
 
   const fetchDeviceList = async () => {
     try {
+      setLoading(true)
       const res = await DeviceAPI.list()
       if (res?.data?.device_list) {
         setDeviceList(res.data.device_list)
       }
+      setLoading(false)
     } catch (error) {
       console.error('获取设备列表失败:', error)
+      setLoading(false)
     }
   }
 
@@ -170,24 +174,15 @@ function Index() {
         </View>
 
         {!isLogin ? (
-          <View className="empty-state">
-            <Empty description="暂无您的设备信息，请登录查看" image={emptyImg} />
-            <Button
-              className="login-btn"
-              onClick={() => setShowLogin(true)}
-            >
-              立即登录
-            </Button>
-          </View>
+          <NotLogin></NotLogin>
         ) : deviceList.length === 0 ? (
           <View className="empty-state">
-            <Empty description="暂无设备" image={emptyImg} />
-            <Button
-              className="bind-btn"
-              onClick={() => Taro.navigateTo({ url: '/pages/bind-car/index' })}
-            >
-              绑定设备
-            </Button>
+            {
+              loading ? (
+                <Loading type="spinner">加载中</Loading>
+              ) :
+                <NotBind></NotBind>
+            }
           </View>
         ) : (
           <View className="device-list">
@@ -266,11 +261,6 @@ function Index() {
         <View className="manual-title">使用手册</View>
         <View className="manual-desc">了解记录仪使用方法</View>
       </View>
-
-      <LoginPopup
-        visible={showLogin}
-        onClose={() => setShowLogin(false)}
-      />
 
       <Dialog id="open_wifi">
         <>

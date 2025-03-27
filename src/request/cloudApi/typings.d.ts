@@ -6,4 +6,5 @@ export interface Photos {
 
 export interface PhotoInfo  {
   photos: Photos[];
+  next_token: string;
 }

@@ -12,11 +12,28 @@ export const CloudAPI = {
    *  接口ID：259941820
    *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259941820
    */
-  getCloudPhoto: ({ page, limit }) => getRequest<ResponseInfoType<PhotoInfo>>({
-    url: `${prefix}/getCloudPhoto`,
+  getCloudPhoto: ({ nextToken, limit, deviceId, type, date }) => getRequest<ResponseInfoType<PhotoInfo>>({
+    url: `${prefix}/getCloudPhotos`,
     params: {
-      page,
-      limit
+      date,
+      nextToken,
+      limit,
+      deviceId,
+      type
     }
   }),
+
+    /**
+   *  获取用户信息
+   *  GET /api/consumer/wx/getSelfInfo
+   *  接口ID：259941820
+   *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259941820
+   */
+    getCloudFolders: ({ deviceId, type }) => getRequest<ResponseInfoType<string[]>>({
+      url: `${prefix}/getCloudFolders`,
+      params: {
+        deviceId,
+        type
+      }
+    }),
 } 

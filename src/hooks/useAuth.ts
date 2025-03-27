@@ -50,7 +50,6 @@ export const useAuth = () => {
       const response = await UserAPI.getUserInfo()
       if (response) {
         const userInfo = response.data
-        setLoginStatus(!!userInfo.phone)
         setUserInfo({
           phone: userInfo.phone,
           openId: userInfo.open_id

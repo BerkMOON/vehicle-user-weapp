@@ -1,0 +1,19 @@
+.empty-state {
+  padding: 40px 0;
+  text-align: center;
+
+  .empty-text {
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .bind-btn {
+    width: 60%;
+    background: #2193b0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+}

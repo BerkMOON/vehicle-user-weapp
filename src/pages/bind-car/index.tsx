@@ -34,7 +34,7 @@ function BindCar() {
     try {
       // 先让用户选择识别类型
       const { tapIndex } = await Taro.showActionSheet({
-        itemList: ['识别驾驶证', '识别车架号铭牌']
+        itemList: ['识别行驶证', '识别其他']
       })
 
       // 选择图片
