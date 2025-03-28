@@ -5,11 +5,14 @@ import { CloudAPI } from '@/request/cloudApi'
 import { DeviceAPI } from '@/request/deviceApi'
 import { Photos } from '@/request/cloudApi/typings'
 import { DeviceInfo } from '@/request/deviceApi/typings'
-import { Empty, Grid, Loading, Video, Image } from '@nutui/nutui-react-taro'
+import { Empty, Grid, Loading, Image, ImagePreview } from '@nutui/nutui-react-taro'
 import emptyImg from '@/assets/empty.png'
 import { useUserStore } from '@/store/user'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
+import VideoPlayer from '@/components/VideoPlayer'
+import { PlayStart } from '@nutui/icons-react-taro'
+
 
 export default function CloudAlbum() {
   const { isLogin } = useUserStore()
@@ -19,13 +22,18 @@ export default function CloudAlbum() {
   const [hasMore, setHasMore] = useState(true)
   const [devices, setDevices] = useState<DeviceInfo[]>([])
   const [selectedDevice, setSelectedDevice] = useState<string>('')
-  const [selectedType, setSelectedType] = useState<string>('photos')
+  const [selectedType, setSelectedType] = useState<string>('shutdown')
   const [selectedFolder, setSelectedFolder] = useState<string>('')
   const [nextToken, setNextToken] = useState('')
   const [deviceLoading, setDeviceLoading] = useState(true)
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewPhotos, setPreviewPhotos] = useState<any[]>([])
+  const [previewVideos, setPreviewVideos] = useState<string>('')
+  const [showVideo, setShowVideo] = useState(false)
   const [typesOptions] = useState([
+    { text: '停车拍照', value: 'shutdown' },
     { text: '照片', value: 'photos' },
-    // { text: '视频', value: 'video' },
+    { text: '视频', value: 'videos' },
   ])
   const pageSize = 15
 
@@ -108,6 +116,7 @@ export default function CloudAlbum() {
 
   useEffect(() => {
     if (selectedDevice) {
+      setSelectedFolder('')
       fetchFolders()
     }
   }, [selectedDevice, selectedType])
@@ -124,6 +133,20 @@ export default function CloudAlbum() {
 
   if (devices.length === 0 && !deviceLoading) {
     return <NotBind></NotBind>
+  }
+
+  const selectedPreviewToPlay = (item) => {
+    if (selectedType === 'videos') {
+      setPreviewPhotos([])
+      setPreviewVideos(item.url)
+      setShowVideo(true)
+    } else {
+      setPreviewVideos('')
+      setPreviewPhotos([
+        { src: item.url }
+      ])
+      setShowPreview(true)
+    }
   }
 
   return (
@@ -181,36 +204,41 @@ export default function CloudAlbum() {
           {mediaList.length === 0 ? (
             !loading && <Empty
               className='empty'
-              description={`暂无${selectedType === 'photo' ? '照片' : '视频'}`}
+              description={`暂无${selectedType === 'videos' ? '视频' : '照片'}`}
               image={emptyImg}
             />
           ) : (
             <View className='photo-grid'>
               <Grid columns={3}>
                 {mediaList.map(item => (
-                  <Grid.Item key={item.id}>
-                    {selectedType === 'photos' ? (
+                  <Grid.Item
+                    text={`拍摄时间:${item.created_time?.split(' ')[1]}` || ''}
+                    key={item.id}
+                    onClick={() => selectedPreviewToPlay(item)}>
+                    {selectedType === 'videos' ? (
                       <Image
                         src={item.url}
+                        loading={<PlayStart />}
+                        error={<PlayStart />}
                         className='photo-image'
                       />
                     ) : (
-                      <Video
-                        className='video-player'
-                        source={{
-                          src: item.url,
-                          type: 'video/mp4',
-                        }}
-                        options={{
-                          controls: true,
-                          playsinline: true,
-                        }}
-                        style={{ height: '165px' }}
+                      <Image
+                        src={item.url}
+                        className='photo-image'
                       />
                     )}
                   </Grid.Item>
                 ))}
               </Grid>
+              <ImagePreview
+                autoPlay={false}
+                images={previewPhotos}
+                visible={showPreview}
+                closeIcon
+                closeIconPosition="bottom"
+                onClose={() => setShowPreview(false)}
+              />
             </View>
           )}
 
@@ -222,12 +250,13 @@ export default function CloudAlbum() {
 
           {!hasMore && mediaList.length > 0 && (
             <View className='no-more'>
-              {selectedType === 'photo' ? '没有更多照片了' : '没有更多视频了'}
+              {selectedType === 'videos' ? '没有更多视频了' : '没有更多照片了'}
             </View>
           )}
         </View>
       </ScrollView>
 
+      <VideoPlayer visible={showVideo} setVisible={setShowVideo} videoUrl={previewVideos}></VideoPlayer>
     </View>
   )
 }

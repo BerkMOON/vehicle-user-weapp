@@ -8,8 +8,7 @@ import { DeviceInfo } from '@/request/deviceApi/typings.d'
 import { Computer } from '@nutui/icons-react-taro'
 import { SettingAPI } from '@/request/settingApi'
 import { handleRequest } from '@/request'
-import { Dialog, Empty, Loading } from '@nutui/nutui-react-taro'
-import emptyImg from '@/assets/empty.png'
+import { Dialog, Loading } from '@nutui/nutui-react-taro'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
 
@@ -48,10 +47,7 @@ function Index() {
       Dialog.open('open_wifi', {
         title: '连接设备WiFi',
         onConfirm: () => {
-          const deviceInfo = Taro.getDeviceInfo()
-          if (deviceInfo.platform === 'android') {
-            connectWifi()
-          }
+          connectWifi()
           Dialog.close('open_wifi')
         },
         onCancel: () => {
@@ -69,11 +65,14 @@ function Index() {
   const connectWifi = () => {
     Taro.startWifi({
       success: function () {
-        Taro.connectWifi({
-          SSID: 'SG10_XXX',
-          password: '12345678',
-          maunal: true,
-        })
+        const deviceInfo = Taro.getDeviceInfo()
+        if (deviceInfo.platform === 'android') {
+          Taro.connectWifi({
+            SSID: 'SG10_XXX',
+            password: '12345678',
+            maunal: true,
+          })
+        }
       },
       fail: function () {
         Taro.showToast({
