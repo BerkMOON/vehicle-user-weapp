@@ -263,20 +263,26 @@ function Index() {
 
       <Dialog id="open_wifi">
         <>
-          <View className="dialog-content">
-            1.打开手机WiFi设置
+          <View className="dialog-title">
+            1. 语音说出"打开WiFi"，切换记录仪至WiFi模式
+          </View>
+          <View className="dialog-title">
+            2. 等待记录仪语音提示："WiFi模式切换成功"
           </View>
           <View className="dialog-content">
-            2.找到并连接名为"SG10_XXX"的WiFi
+            3.打开手机WiFi设置
           </View>
           <View className="dialog-content">
-            3.输入WiFi密码：12345678
+            4.找到并连接名为"SG10_XXX"的WiFi
           </View>
           <View className="dialog-content">
-            4.等待WiFi连接成功
+            5.输入WiFi密码：12345678
           </View>
           <View className="dialog-content">
-            5.返回小程序
+            6.等待WiFi连接成功
+          </View>
+          <View className="dialog-content">
+            7.返回小程序
           </View>
         </>
       </Dialog>

@@ -185,12 +185,13 @@ export default function CloudAlbum() {
           mode='selector'
           range={folders}
           value={folders.indexOf(selectedFolder)}
+          disabled={folders.length === 0}
           onChange={(e) => {
             setSelectedFolder(folders[e.detail.value])
           }}
         >
           <View className='picker-item'>
-            {selectedFolder || '请选择日期'}
+            {selectedFolder ||  (folders.length === 0 ? '暂无日期' : '请选择日期')}
           </View>
         </Picker>
       </View>
