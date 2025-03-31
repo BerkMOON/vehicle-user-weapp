@@ -13,7 +13,7 @@ import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
 
 function Index() {
-  const { isLogin } = useUserStore()
+  const { isLogin, loginStatus } = useUserStore()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
   const [connectDeivce, setConnectDevice] = useState(null)
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
@@ -124,12 +124,12 @@ function Index() {
     }
   }
 
-
   useEffect(() => {
-    if (isLogin) {
+    // 只有当登录状态为 success 时才获取设备列表
+    if (isLogin && loginStatus === 'success') {
       fetchDeviceList()
     }
-  }, [isLogin])
+  }, [isLogin, loginStatus])  // 添加 loginStatus 作为依赖
 
   const handleUnbind = async (sn: string) => {
     try {

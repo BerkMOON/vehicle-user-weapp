@@ -11,10 +11,11 @@ interface UserInfo {
 interface UserState {
   userInfo: UserInfo
   isLogin: boolean
+  loginStatus: 'pending' | 'success' | 'error'
   setUserInfo: (info: UserInfo) => void
+  setLoginStatus: (status: 'pending' |'success' | 'error') => void
   clearUserInfo: () => void
   initializeFromStorage: () => Promise<void>
-  setLoginStatus: (status: boolean) => void  // 新增方法
 }
 
 // 从存储中读取数据
@@ -41,6 +42,7 @@ export const useUserStore = create<UserState>((set) => ({
     openId: '',
   },
   isLogin: false,
+  loginStatus: 'pending',
 
   initializeFromStorage: async () => {
     const savedUserInfo = await loadFromStorage()
@@ -71,13 +73,5 @@ export const useUserStore = create<UserState>((set) => ({
     Taro.removeStorage({ key: STORAGE_KEY })
   },
 
-  setLoginStatus: (status) => {
-    set((state) => ({
-      isLogin: status,
-      userInfo: {
-        ...state.userInfo,
-        isLogin: status
-      }
-    }))
-  },
+  setLoginStatus: (status) => set({ loginStatus: status }),
 }))
