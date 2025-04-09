@@ -6,19 +6,15 @@ import Taro, { useRouter } from '@tarojs/taro'
 import { DeviceAPI } from '@/request/deviceApi'
 import { SuccessCode } from '@/constants/constants'
 import { useUserStore } from '@/store/user'
-import { useAuth } from '@/hooks/useAuth'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import LoginPopup from '@/components/LoginPopup'
 
 function BindCar() {
   const router = useRouter()
   const [form] = Form.useForm()
 
   const { userInfo: { phone } } = useUserStore()
-  const { handleGetPhoneNumber } = useAuth()
-
-  const getPhoneNumber = async (e) => {
-    await handleGetPhoneNumber(e.detail.code)
-  }
+  const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
     // 处理页面参数
@@ -190,15 +186,35 @@ function BindCar() {
           <Scan onClick={handleOCR} />
         </View>
 
+        <View className="input-with-actions">
+          <Form.Item
+            label="手机号"
+            name="phone"
+            rules={[{ pattern: /^1\d{10}$/, message: '请输入正确的手机号' }]}
+          >
+            <Input
+              className="form-input"
+              placeholder="手机号"
+              type="text"
+              clearable
+            />
+          </Form.Item>
+        </View>
+
         <View className="form-actions">
           {
-            !phone ? <Button block color="#2193B0" openType='getPhoneNumber' onGetPhoneNumber={getPhoneNumber}>
-              登录获取手机号
+            !phone ? <Button block color="#2193B0" onClick={() => setShowLogin(true)}>
+              立即登录
             </Button> : <Button block color="#2193B0" formType="submit">
               绑定
             </Button>
           }
         </View>
+
+        <LoginPopup
+          visible={showLogin}
+          onClose={() => setShowLogin(false)}
+        />
       </Form>
     </View>
   )

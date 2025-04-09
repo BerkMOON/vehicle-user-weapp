@@ -9,6 +9,7 @@ export interface DeviceInfo {
   device_id: string;
   sn: string;
   vin: string;
+  phone: string;
   status: {
     code: number;
     name: string;
