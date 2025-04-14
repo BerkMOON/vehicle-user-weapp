@@ -4,6 +4,8 @@
   flex-direction: column;
   overflow: hidden;
 
+  --nutui-tabs-tabpane-padding: 0;
+
   .content-scroll {
     height: calc(100vh - 88px); // 减去头部和标签页的高度
     ::-webkit-scrollbar {

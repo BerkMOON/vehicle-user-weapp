@@ -15,22 +15,35 @@ import NotBind from '@/components/NotBind'
 function Index() {
   const { isLogin, loginStatus } = useUserStore()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
-  const [connectDeivce, setConnectDevice] = useState(null)
+  const [connectDeivce, setConnectDevice] = useState<{
+    sn: string,
+    version: string,
+    loading: boolean
+  }>({
+    sn: '',
+    version: '',
+    loading: false
+  })
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
   const [loading, setLoading] = useState(true)
 
-  const checkConnection = async () => {
+  const checkConnection = async (sn: string) => {
     try {
       handleRequest({
         url: SettingAPI.getFirmwareVersion(),
         errorMsg: '',
         onSuccess: (data) => {
           const versionMatch = data.match(/Camera\.Menu\.FWversion=(.+)/)
-          setConnectDevice(versionMatch[1])
+          setConnectDevice({
+            sn,
+            loading: false,
+            version: versionMatch[1] || '',
+          })
           if (timerRef.current) {
             clearInterval(timerRef.current)
             timerRef.current = null
           }
+          Taro.offWifiConnected()
           Taro.showToast({
             title: '设备已连接',
             icon: 'success'
@@ -42,11 +55,30 @@ function Index() {
     }
   }
 
-  const handleConnect = async () => {
+  const handleConnect = async (sn: string) => {
+    if (connectDeivce.loading || connectDeivce.sn === sn) {
+      // 如果正在连接，点击则取消连接
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      setConnectDevice({
+        sn: '',
+        version: '',
+        loading: false
+      })
+      Taro.offWifiConnected()
+      return
+    }
     try {
       Dialog.open('open_wifi', {
         title: '连接设备WiFi',
         onConfirm: () => {
+          setConnectDevice({
+            sn,
+            version: '',
+            loading: true
+          })
           connectWifi()
           Dialog.close('open_wifi')
         },
@@ -61,6 +93,22 @@ function Index() {
       })
     }
   }
+
+  const handleWifiConnected = (res, sn) => {
+    if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
+      // 是目标设备的 WiFi，开始轮询
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+      timerRef.current = setInterval(() => checkConnection(sn), 1000)
+    }
+  }
+
+  useEffect(() => {
+    if (connectDeivce.loading) {
+      Taro.onWifiConnected((res) => handleWifiConnected(res, connectDeivce.sn))
+    }
+  }, [connectDeivce.loading])
 
   const connectWifi = () => {
     Taro.startWifi({
@@ -83,30 +131,12 @@ function Index() {
     })
   }
 
-  // 添加 WiFi 状态监听
   useEffect(() => {
-    // 监听 WiFi 状态变化
-    Taro.onWifiConnected(function (res) {
-      if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
-        // 是目标设备的 WiFi，开始轮询
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-        }
-        timerRef.current = setInterval(() => checkConnection(), 2000)
-      }
-      if (!res.wifi || !res.wifi.SSID.startsWith('SG10')) {
-        // WiFi 断开或连接到其他网络，清除轮询
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
-          timerRef.current = null
-        }
-        setConnectDevice(null)
-      }
-    })
-
     return () => {
       // 组件卸载时移除监听
-      Taro.offWifiConnected()
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
     }
   }, [])
 
@@ -192,45 +222,42 @@ function Index() {
                   <View className="vin">车架号：{device.vin}</View>
                   <View className="vin">绑定手机号：{device.phone}</View>
                   {
-                    connectDeivce && <View className="vin">
+                    connectDeivce?.sn === device.sn && connectDeivce.version && <View className="vin">
                       <View> 固件版本号：</View>
-                      <View>{connectDeivce}</View>
+                      <View>{connectDeivce?.version}</View>
                     </View>
                   }
                   <View className="connect-status">
-                    {connectDeivce ? (
-                      <View className="connected">已连接</View>
-                    ) : (
-                      <Button
-                        className="connect-btn"
-                        onClick={() => handleConnect()}
-                      >
-                        连接设备
-                      </Button>
-                    )}
+                    <Button
+                      className="connect-btn"
+                      onClick={() => handleConnect(device.sn)}
+                      loading={connectDeivce?.loading && connectDeivce?.sn === device.sn}
+                    >
+                      {connectDeivce?.sn === device.sn ? '取消连接' : '连接设备'}
+                    </Button>
                   </View>
                 </View>
                 <View className="device-actions">
                   <Button
                     className="action-btn"
                     onClick={() => Taro.navigateTo({ url: '/pages/recorder/index' })}
-                    disabled={!connectDeivce}  // 添加设备连接状态判断
+                    disabled={!(connectDeivce?.sn === device.sn && connectDeivce.version)}  // 添加设备连接状态判断
                   >
                     查看
                   </Button>
                   <Button
                     className="action-btn"
                     onClick={() => Taro.navigateTo({ url: '/pages/settings/index' })}
-                    disabled={!connectDeivce}  // 添加设备连接状态判断
+                    disabled={!(connectDeivce?.sn === device.sn && connectDeivce.version)}   // 添加设备连接状态判断
                   >
                     设置
                   </Button>
-                  <Button
+                  {/* <Button
                     className="action-btn"
                     onClick={() => Taro.navigateTo({ url: '/pages/downloads/index' })}
                   >
                     下载
-                  </Button>
+                  </Button> */}
                   <Button
                     className="unbind-btn"
                     onClick={() => {

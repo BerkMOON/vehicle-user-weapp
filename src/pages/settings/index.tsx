@@ -4,7 +4,7 @@ import { Disk, Photograph, Power, Tips, Voice } from '@nutui/icons-react-taro'
 import { Picker } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import './index.scss'
-import { StorageInfo, GSENSOR_LEVELS, VIDEO_RESOLUTIONS, RECORDING_DURATIONS, PARKING_MONITOR } from './constants'
+import { StorageInfo, RECORDING_DURATIONS } from './constants'
 import { parseStorageInfo } from '@/utils/utils'
 import { handleRequest } from '@/request'
 import { SettingAPI } from '@/request/settingApi'
@@ -14,16 +14,11 @@ function Settings() {
   const [isMuted, setIsMuted] = useState(false)
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [isFormatting, setIsFormatting] = useState(false)
-  const [gSensorLevel, setGSensorLevel] = useState('LEVEL0')
-  const [visible, setVisible] = useState(false)
-  const [videoResolution, setVideoResolution] = useState('1080P30')
-  const [resolutionPickerVisible, setResolutionPickerVisible] = useState(false)
   const [volume, setVolume] = useState(5)
   const [recordingDuration, setRecordingDuration] = useState('1MIN')
   const [durationPickerVisible, setDurationPickerVisible] = useState(false)
   const [parkingMonitor, setParkingMonitor] = useState('DISABLE')
   const [version, setVersion] = useState('')
-  const [flipSenor, setFlipSenor] = useState('ON')
 
   // 获取存储信息
   const fetchStorageInfo = () => {
@@ -63,16 +58,10 @@ function Settings() {
       url: SettingAPI.getMenuInfo(),
       errorMsg: '获取设备信息失败',
       onSuccess: (data) => {
-        const gSensorMatch = data.match(/GSensor=(\w+)/)
-        const videoresmatch = data.match(/VideoRes=(\w+)/)
         const volumeMatch = data.match(/VolAdj=(\d+)/)
         const loopingVideoMatch = data.match(/LoopingVideo=(\w+)/)
         const parkingMonitorMatch = data.match(/ParkingMonitor=(\w+)/)
         const versionMatch = data.match(/FWversion=(\w+)/)
-        const flipMatch = data.match(/Flip.Sensor=(\w+)/)
-        if (flipMatch) {
-          setFlipSenor(flipMatch[1])
-        }
         if (versionMatch) {
           setVersion(versionMatch[1])
         }
@@ -84,12 +73,6 @@ function Settings() {
         }
         if (volumeMatch) {
           setVolume(parseInt(volumeMatch[1], 10))
-        }
-        if (videoresmatch) {
-          setVideoResolution(videoresmatch[1])
-        }
-        if (gSensorMatch) {
-          setGSensorLevel(gSensorMatch[1])
         }
       }
     })
@@ -177,26 +160,6 @@ function Settings() {
     })
   }
 
-  // 设置碰撞灵敏度
-  const handleGSensorChange = (values: string[]) => {
-    handleRequest({
-      url: SettingAPI.setGSensorLevel(values[0]),
-      successMsg: '设置成功',
-      errorMsg: '设置碰撞灵敏度失败',
-      onSuccess: () => setGSensorLevel(values[0])
-    })
-  }
-
-  // 设置视频分辨率
-  const handleResolutionChange = (values: string[]) => {
-    handleRequest({
-      url: SettingAPI.setVideoResolution(values[0]),
-      successMsg: '设置成功',
-      errorMsg: '设置视频分辨率失败',
-      onSuccess: () => setVideoResolution(values[0])
-    })
-  }
-
   // 设置录像时长
   const handleDurationChange = (values: string[]) => {
     handleRequest({
@@ -228,16 +191,6 @@ function Settings() {
     })
   }
 
-  // 切换摄像头翻转状态
-  const handleFlipSenorChange = (value: boolean) => {
-    handleRequest({
-      url: SettingAPI.setFlipSenor(value ? 'ON' : 'OFF'),
-      successMsg: '设置成功',
-      errorMsg: '设置摄像头翻转状态失败',
-      onSuccess: () => setFlipSenor(value ? 'ON' : 'OFF')
-    })
-  }
-
   useEffect(() => {
     fetchCameraInfo()
     fetchStorageInfo()
@@ -265,10 +218,10 @@ function Settings() {
           <Power />
           <Text className="title">设备设置</Text>
         </View>
-        <View className="setting-item">
+        {/* <View className="setting-item">
           <Text>碰撞灵敏度 <Tips className='custom-icon' size={15} /></Text>
           <View onClick={() => setVisible(true)}>{GSENSOR_LEVELS.find(gSensor => gSensor.value === gSensorLevel)?.text}</View>
-        </View>
+        </View> */}
         <View className="setting-item">
           <Text>停车监控 <Tips className='custom-icon' size={15} /></Text>
           <Switch
@@ -296,24 +249,17 @@ function Settings() {
             {RECORDING_DURATIONS.find(duration => duration.value === recordingDuration)?.text}
           </View>
         </View>
-        <View className="setting-item">
+        {/* <View className="setting-item">
           <Text>摄像头录像质量</Text>
           <View onClick={() => setResolutionPickerVisible(true)}>
             {VIDEO_RESOLUTIONS.find(res => res.value === videoResolution)?.text}
           </View>
-        </View>
+        </View> */}
         <View className="setting-item">
           <Text>静音录像</Text>
           <Switch
             checked={isMuted}
             onChange={(e) => handleMuteToggle(e.detail.value)}
-          />
-        </View>
-        <View className="setting-item">
-          <Text>摄像头翻转180度 <Tips className='custom-icon' size={15} /></Text>
-          <Switch
-            checked={flipSenor === 'ON'}
-            onChange={(e) => handleFlipSenorChange(e.detail.value)}
           />
         </View>
       </View>
@@ -392,22 +338,6 @@ function Settings() {
         </View>
       </View>
 
-      <Picker
-        title="请选择碰撞灵敏度"
-        visible={visible}
-        value={[gSensorLevel]}
-        options={GSENSOR_LEVELS}
-        onConfirm={(_, values) => handleGSensorChange(values as string[])}
-        onClose={() => setVisible(false)}
-      />
-      <Picker
-        title="请选择视频分辨率"
-        visible={resolutionPickerVisible}
-        value={[videoResolution]}
-        options={VIDEO_RESOLUTIONS}
-        onConfirm={(_, values) => handleResolutionChange(values as string[])}
-        onClose={() => setResolutionPickerVisible(false)}
-      />
       <Picker
         title="请选择录像时长"
         visible={durationPickerVisible}

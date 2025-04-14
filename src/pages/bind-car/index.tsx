@@ -194,7 +194,7 @@ function BindCar() {
           >
             <Input
               className="form-input"
-              placeholder="手机号"
+              placeholder="请输入手机号"
               type="text"
               clearable
             />
