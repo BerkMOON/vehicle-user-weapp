@@ -3,6 +3,7 @@ export interface Photos {
   url: string;
   name: string;
   created_time: string
+  size: number;
 }
 
 export interface PhotoInfo {

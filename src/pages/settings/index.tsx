@@ -8,6 +8,7 @@ import { StorageInfo, RECORDING_DURATIONS } from './constants'
 import { parseStorageInfo } from '@/utils/utils'
 import { handleRequest } from '@/request'
 import { SettingAPI } from '@/request/settingApi'
+import BublePop from '@/components/BublePop'
 
 function Settings() {
   const [isRecording, setIsRecording] = useState(false)
@@ -18,7 +19,13 @@ function Settings() {
   const [recordingDuration, setRecordingDuration] = useState('1MIN')
   const [durationPickerVisible, setDurationPickerVisible] = useState(false)
   const [parkingMonitor, setParkingMonitor] = useState('DISABLE')
+  const [parkingCapture, setParkingCapture] = useState('DISABLE')
   const [version, setVersion] = useState('')
+  const [isPopupVisible, setIsPopupVisible] = useState({
+    parkingCapture: false,
+    parkingMonitor: false,
+    recordingDuration: false,
+  })
 
   // 获取存储信息
   const fetchStorageInfo = () => {
@@ -62,6 +69,7 @@ function Settings() {
         const loopingVideoMatch = data.match(/LoopingVideo=(\w+)/)
         const parkingMonitorMatch = data.match(/ParkingMonitor=(\w+)/)
         const versionMatch = data.match(/FWversion=(\w+)/)
+        const isParkingCaptureMatch = data.match(/ParkCapture=(\w+)/)
         if (versionMatch) {
           setVersion(versionMatch[1])
         }
@@ -73,6 +81,9 @@ function Settings() {
         }
         if (volumeMatch) {
           setVolume(parseInt(volumeMatch[1], 10))
+        }
+        if (isParkingCaptureMatch) {
+          setParkingCapture(isParkingCaptureMatch[1])
         }
       }
     })
@@ -191,6 +202,17 @@ function Settings() {
     })
   }
 
+  // 设置停车拍照
+  const handleParkingCaptureToggle = (value: boolean) => {
+    const parkingCaptureValue = value ? 'ENABLE' : 'DISABLE'
+    handleRequest({
+      url: SettingAPI.setParkingCapture(parkingCaptureValue),
+      successMsg: value ? '已开启停车拍照' : '已关闭停车拍照',
+      errorMsg: '切换停车拍照状态失败',
+      onSuccess: () => setParkingCapture(parkingCaptureValue)
+    })
+  }
+
   useEffect(() => {
     fetchCameraInfo()
     fetchStorageInfo()
@@ -218,12 +240,19 @@ function Settings() {
           <Power />
           <Text className="title">设备设置</Text>
         </View>
-        {/* <View className="setting-item">
-          <Text>碰撞灵敏度 <Tips className='custom-icon' size={15} /></Text>
-          <View onClick={() => setVisible(true)}>{GSENSOR_LEVELS.find(gSensor => gSensor.value === gSensorLevel)?.text}</View>
-        </View> */}
         <View className="setting-item">
-          <Text>停车监控 <Tips className='custom-icon' size={15} /></Text>
+          <BublePop content="开启后，车辆停车时会设备会拍摄一张照片，可在云相册中查看" position='right' >
+            <Text>停车拍照 <Tips className='custom-icon' size={15} /></Text>
+          </BublePop>
+          <Switch
+            checked={parkingCapture === 'ENABLE'}
+            onChange={(e) => handleParkingCaptureToggle(e.detail.value)}
+          />
+        </View>
+        <View className="setting-item">
+          <BublePop content="开启后，当检测到碰撞或震动时，设备会记录停车过程中的异常情况" position='right' >
+            <Text>停车监控 <Tips className='custom-icon' size={15} /></Text>
+          </BublePop>
           <Switch
             checked={parkingMonitor === 'ENABLE'}
             onChange={(e) => handleParkingMonitorChange(e.detail.value)}
@@ -249,12 +278,6 @@ function Settings() {
             {RECORDING_DURATIONS.find(duration => duration.value === recordingDuration)?.text}
           </View>
         </View>
-        {/* <View className="setting-item">
-          <Text>摄像头录像质量</Text>
-          <View onClick={() => setResolutionPickerVisible(true)}>
-            {VIDEO_RESOLUTIONS.find(res => res.value === videoResolution)?.text}
-          </View>
-        </View> */}
         <View className="setting-item">
           <Text>静音录像</Text>
           <Switch
@@ -270,7 +293,7 @@ function Settings() {
           <Text className="title">音量设置</Text>
         </View>
         <View className="setting-item">
-          <Text>扬声器音量 <Tips className='custom-icon' size={15} /></Text>
+          <Text>扬声器音量</Text>
           <Text className="volume-value">{volume}</Text>
         </View>
         <Slider
@@ -328,7 +351,9 @@ function Settings() {
           <Text>{version}</Text>
         </View>
         <View className="setting-item">
-          <Text>恢复出厂设置 <Tips className='custom-icon' size={15} /></Text>
+          <BublePop content="恢复出厂设置，需先拔出TF卡" position='right' >
+            <Text>恢复出厂设置 <Tips className='custom-icon' size={15} /></Text>
+          </BublePop>
           <Text
             className={`format-btn ${isFormatting ? 'disabled' : ''}`}
             onClick={handleFactoryReset}

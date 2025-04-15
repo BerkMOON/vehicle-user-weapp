@@ -1,17 +1,18 @@
-import { View, Picker, ScrollView } from '@tarojs/components'  // 添加 Picker 导入
+import { View, Picker, ScrollView, Text, Image } from '@tarojs/components'  // 添加 Picker 导入
 import { useEffect, useState } from 'react'
 import './index.scss'
 import { CloudAPI } from '@/request/cloudApi'
 import { DeviceAPI } from '@/request/deviceApi'
 import { Photos } from '@/request/cloudApi/typings'
 import { DeviceInfo } from '@/request/deviceApi/typings'
-import { Empty, Grid, Loading, Image, ImagePreview } from '@nutui/nutui-react-taro'
+import { Empty, Grid, Loading } from '@nutui/nutui-react-taro'
 import emptyImg from '@/assets/empty.png'
 import { useUserStore } from '@/store/user'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
-import VideoPlayer from '@/components/VideoPlayer'
 import { PlayStart } from '@nutui/icons-react-taro'
+import Taro from '@tarojs/taro'
+import { formatFileSize } from '@/utils/utils'
 
 
 export default function CloudAlbum() {
@@ -26,10 +27,6 @@ export default function CloudAlbum() {
   const [selectedFolder, setSelectedFolder] = useState<string>('')
   const [nextToken, setNextToken] = useState('')
   const [deviceLoading, setDeviceLoading] = useState(true)
-  const [showPreview, setShowPreview] = useState(false)
-  const [previewPhotos, setPreviewPhotos] = useState<any[]>([])
-  const [previewVideos, setPreviewVideos] = useState<string>('')
-  const [showVideo, setShowVideo] = useState(false)
   const [typesOptions] = useState([
     { text: '停车拍照', value: 'shutdown' },
     { text: '照片', value: 'photos' },
@@ -137,15 +134,21 @@ export default function CloudAlbum() {
 
   const selectedPreviewToPlay = (item) => {
     if (selectedType === 'videos') {
-      setPreviewPhotos([])
-      setPreviewVideos(item.url)
-      setShowVideo(true)
+      Taro.previewMedia({
+        sources: mediaList.map(item => {
+          return {
+            url: item.url,
+            type: 'video'
+          }
+        }),
+        current: mediaList.indexOf(item)
+      })
+
     } else {
-      setPreviewVideos('')
-      setPreviewPhotos([
-        { src: item.url }
-      ])
-      setShowPreview(true)
+      Taro.previewImage({
+        urls: mediaList.map(item => item.url),
+        current: mediaList.indexOf(item)
+      })
     }
   }
 
@@ -191,7 +194,7 @@ export default function CloudAlbum() {
           }}
         >
           <View className='picker-item'>
-            {selectedFolder ||  (folders.length === 0 ? '暂无日期' : '请选择日期')}
+            {selectedFolder || (folders.length === 0 ? '暂无日期' : '请选择日期')}
           </View>
         </Picker>
       </View>
@@ -209,37 +212,70 @@ export default function CloudAlbum() {
               image={emptyImg}
             />
           ) : (
-            <View className='photo-grid'>
-              <Grid columns={3}>
-                {mediaList.map(item => (
-                  <Grid.Item
-                    text={`拍摄时间:${item.created_time?.split(' ')[1]}` || ''}
-                    key={item.id}
-                    onClick={() => selectedPreviewToPlay(item)}>
+            // <View className='photo-grid'>
+            //   <Grid columns={3}>
+            //     {mediaList.map(item => (
+            //       <Grid.Item
+            //         text={`拍摄时间:${item.created_time?.split(' ')[1]}` || ''}
+            //         key={item.id}
+            //         onClick={() => selectedPreviewToPlay(item)}>
+            //         {selectedType === 'videos' ? (
+            //           <Image
+            //             src={item.url}
+            //             loading={<PlayStart />}
+            //             error={<PlayStart />}
+            //             className='photo-image'
+            //           />
+            //         ) : (
+            //           <Image
+            //             src={item.url}
+            //             className='photo-image'
+            //           />
+            //         )}
+            //       </Grid.Item>
+            //     ))}
+            //   </Grid>
+            // </View>
+            <View className="files-grid">
+              {mediaList.map((file) => (
+                <View
+                  key={`${file.id}-${file.created_time}`}
+                  className="file-item"
+                  onClick={() => {
+                    selectedPreviewToPlay(file)
+                  }}
+                >
+                  <View className="thumbnail-wrapper">
                     {selectedType === 'videos' ? (
-                      <Image
-                        src={item.url}
-                        loading={<PlayStart />}
-                        error={<PlayStart />}
-                        className='photo-image'
-                      />
+                      <View className="video-thumbnail">
+                        <PlayStart size={30} style={{ zIndex: 1 }} />
+                        <Image
+                          src={file.url || ''}
+                          className="thumbnail"
+                          mode="aspectFill"
+                        />
+                      </View>
                     ) : (
                       <Image
-                        src={item.url}
-                        className='photo-image'
+                        src={file.url}
+                        className="thumbnail"
+                        mode="aspectFill"
                       />
                     )}
-                  </Grid.Item>
-                ))}
-              </Grid>
-              <ImagePreview
-                autoPlay={false}
-                images={previewPhotos}
-                visible={showPreview}
-                closeIcon
-                closeIconPosition="bottom"
-                onClose={() => setShowPreview(false)}
-              />
+
+                  </View>
+                  <View className="file-info">
+                    <View className="info-row">
+                      <Text className="label">时间:</Text>
+                      <Text className="time">{file.created_time?.split(' ')[1]}</Text>
+                    </View>
+                    <View className="info-row">
+                      <Text className="label">大小:</Text>
+                      <Text className="size">{formatFileSize(file.size)}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
             </View>
           )}
 
@@ -256,8 +292,6 @@ export default function CloudAlbum() {
           )}
         </View>
       </ScrollView>
-
-      <VideoPlayer visible={showVideo} setVisible={setShowVideo} videoUrl={previewVideos}></VideoPlayer>
     </View>
   )
 }

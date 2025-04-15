@@ -45,11 +45,6 @@
           opacity: 0.8;
         }
       }
-
-      .custom-icon {
-        position: relative;
-        top: 2px;
-      }
     }
 
     .storage-info {
@@ -77,4 +72,9 @@
       }
     }
   }
+}
+
+.custom-icon {
+  position: relative;
+  top: 2px;
 }

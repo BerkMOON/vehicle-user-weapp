@@ -1,7 +1,6 @@
 import { useDidShow, useDidHide } from '@tarojs/taro'
 // 全局样式
 import './app.scss'
-import { useDownloadStore } from './store/download'
 import { useUserStore } from './store/user'
 import { useAuth } from './hooks/useAuth'
 
@@ -11,7 +10,6 @@ function App(props) {
   useAuth()
   // 对应 onShow
   useDidShow(() => {
-    useDownloadStore.getState().initializeFromStorage()
     useUserStore.getState().initializeFromStorage()
   })
 

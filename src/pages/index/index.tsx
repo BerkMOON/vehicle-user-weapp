@@ -252,12 +252,6 @@ function Index() {
                   >
                     设置
                   </Button>
-                  {/* <Button
-                    className="action-btn"
-                    onClick={() => Taro.navigateTo({ url: '/pages/downloads/index' })}
-                  >
-                    下载
-                  </Button> */}
                   <Button
                     className="unbind-btn"
                     onClick={() => {

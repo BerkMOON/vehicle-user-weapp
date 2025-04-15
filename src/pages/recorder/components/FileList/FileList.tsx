@@ -7,15 +7,15 @@ import emptyImg from '@/assets/empty.png'
 
 interface FileListProps {
   fileList: FileGroup[]
-  isSelectMode: boolean
-  onFileSelect: (groupIndex: number, fileIndex: number) => void
+  // isSelectMode: boolean
+  // onFileSelect: (groupIndex: number, fileIndex: number) => void
   onFileClick: (file: FileItem) => void
 }
 
 export const FileList: React.FC<FileListProps> = ({
   fileList,
-  isSelectMode,
-  onFileSelect,
+  // isSelectMode,
+  // onFileSelect,
   onFileClick
 }) => {
   return (
@@ -25,23 +25,19 @@ export const FileList: React.FC<FileListProps> = ({
       ) : (
         <>
           {
-            fileList.map((group, groupIndex) => (
+            fileList.map((group) => (
               <View key={group.date} className="file-group">
                 <View className="date-header">
                   <Text className="date">{group.date}</Text>
                   <Text className="file-count">{group.files.length}个文件</Text>
                 </View>
                 <View className="files-grid">
-                  {group.files.map((file, fileIndex) => (
+                  {group.files.map((file) => (
                     <View
                       key={`${group.date}-${file.time}`}
                       className={`file-item ${file.selected ? 'selected' : ''}`}
                       onClick={() => {
-                        if (isSelectMode) {
-                          onFileSelect(groupIndex, fileIndex)
-                        } else {
-                          onFileClick(file)
-                        }
+                        onFileClick(file)
                       }}
                     >
                       <View className="thumbnail-wrapper">
@@ -60,11 +56,6 @@ export const FileList: React.FC<FileListProps> = ({
                             className="thumbnail"
                             mode="aspectFill"
                           />
-                        )}
-                        {isSelectMode && (
-                          <View className={`select-indicator ${file.selected ? 'selected' : ''}`}>
-                            {file.selected ? '✓' : ''}
-                          </View>
                         )}
                       </View>
                       <View className="file-info">

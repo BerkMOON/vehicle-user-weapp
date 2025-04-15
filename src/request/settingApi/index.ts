@@ -95,6 +95,13 @@ export const SettingAPI = {
     value
   }),
 
+  // 设置停车拍照
+  setParkingCapture: (value: string) => getRequestUrl({
+    action: 'set',
+    property: 'ParkCapture',
+    value: value
+  }),
+
   // 设置摄像头翻转状态
   setFlipSenor: (value: string) => getRequestUrl({
     action: 'set',
