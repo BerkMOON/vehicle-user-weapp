@@ -13,7 +13,7 @@ function NotLogin() {
       <View className="empty-state">
         <Empty description="暂无您的设备信息，请登录查看" image={emptyImg} />
         <Button
-          className="login-btn"
+          className="btn"
           onClick={() => setShowLogin(true)}
         >
           立即登录

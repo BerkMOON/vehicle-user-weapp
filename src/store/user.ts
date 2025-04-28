@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import Taro from '@tarojs/taro'
+import { SystemInfo } from '@/request/useApi/typings'
 
 const STORAGE_KEY = 'USER_INFO'
 
 interface UserInfo {
   phone: string
   openId: string
+  deviceInfo?: SystemInfo
 }
 
 interface UserState {
@@ -40,6 +42,7 @@ export const useUserStore = create<UserState>((set) => ({
   userInfo: {
     phone: '',
     openId: '',
+    deviceInfo: undefined
   },
   isLogin: false,
   loginStatus: 'pending',
@@ -66,7 +69,7 @@ export const useUserStore = create<UserState>((set) => ({
     set({ 
       userInfo: {
         phone: '',
-        openId: ''
+        openId: '',
       },
       isLogin: false
     })

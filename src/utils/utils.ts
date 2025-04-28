@@ -100,24 +100,13 @@ export const generateBasicNonce = () => {
 }
 
 export const generateNonce = () => {
-  return new Promise((resolve) => {
-    Taro.getSystemInfo({
-      success: (res) => {
-        const { platform, brand, model } = res;
-        const timestamp = getSecondTimestamp();
-        const random = Math.random().toString(36).substr(2, 8);
-        const deviceInfo = `${platform}_${brand}_${model}`.replace(/\s+/g, '');
-        const hash = simpleHash(deviceInfo);
-
-        const nonce = `${timestamp}_${hash}_${random}`;
-        resolve(nonce);
-      },
-      fail: () => {
-        // 降级方案
-        resolve(generateBasicNonce());
-      }
-    });
-  });
+  const { platform, brand, model } = Taro.getDeviceInfo()
+  const timestamp = getSecondTimestamp();
+  const random = Math.random().toString(36).substr(2, 8);
+  const deviceInfo = `${platform}_${brand}_${model}`.replace(/\s+/g, '');
+  const hash = simpleHash(deviceInfo);
+  const nonce = `${timestamp}_${hash}_${random}`;
+  return nonce;
 }
 
 export const generateSignature = ({

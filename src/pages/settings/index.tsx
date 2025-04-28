@@ -21,11 +21,6 @@ function Settings() {
   const [parkingMonitor, setParkingMonitor] = useState('DISABLE')
   const [parkingCapture, setParkingCapture] = useState('DISABLE')
   const [version, setVersion] = useState('')
-  const [isPopupVisible, setIsPopupVisible] = useState({
-    parkingCapture: false,
-    parkingMonitor: false,
-    recordingDuration: false,
-  })
 
   // 获取存储信息
   const fetchStorageInfo = () => {

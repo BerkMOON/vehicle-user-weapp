@@ -8,7 +8,7 @@ let isInitialized = false
 let isLoginRetrying = false  // 添加重试标记
 
 export const useAuth = () => {
-  const { setUserInfo, setLoginStatus } = useUserStore()  // 添加 setLoginStatus
+  const { setUserInfo, setLoginStatus, userInfo } = useUserStore()  // 添加 setLoginStatus
 
   const handleWxLogin = async () => {
     if (isLoginRetrying) return
@@ -16,7 +16,7 @@ export const useAuth = () => {
       isLoginRetrying = true
       setLoginStatus('pending')  // 设置登录状态为处理中
       const { code } = await Taro.login()
-      const nonce = await generateNonce() as string
+      const nonce = generateNonce()
       const timestamp = getSecondTimestamp()
       const signature = await generateSignature({ code, nonce, timestamp })
 
@@ -51,21 +51,32 @@ export const useAuth = () => {
         const userInfo = response.data
         setUserInfo({
           phone: userInfo.phone,
-          openId: userInfo.open_id
+          openId: userInfo.open_id,
+          deviceInfo: userInfo.device_info
         })
         setLoginStatus('success')  // 设置登录状态为成功
-        Taro.hideLoading()
       }
     } catch (error) {
       console.error('获取用户信息失败：', error)
       await handleWxLogin()
-      Taro.hideLoading()
     }
   }
 
   const handleGetPhoneNumber = async (code: string) => {
     await UserAPI.setPhone({ code })
     await checkLoginStatus()
+  }
+
+  const handleSetDeviceInfo = async () => {
+    const { platform, system, brand, model } = Taro.getDeviceInfo()
+    if (!userInfo?.deviceInfo || (userInfo.deviceInfo?.model !== model)) {
+      await UserAPI.setDeviceInfo({
+        platform,
+        system,
+        brand,
+        model
+      })
+    }
   }
 
   useEffect(() => {
@@ -76,6 +87,7 @@ export const useAuth = () => {
   }, [])
 
   return {
-    handleGetPhoneNumber
+    handleGetPhoneNumber,
+    handleSetDeviceInfo
   }
 }

@@ -1,5 +1,5 @@
 import Taro from "@tarojs/taro"
-import { LoginParams, UserInfo } from "./typings"
+import { LoginParams, SystemInfo, UserInfo } from "./typings"
 import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
 
@@ -38,5 +38,16 @@ export const UserAPI = {
   setPhone: (params: { code: string }) => postRequest<ResponseInfoType<null>>({
     url: `${prefix}/getPhone`,
     params: params,
+  }),
+
+  /**
+   * 上传手机设备信息
+   * POST /api/consumer/wx/setDeviceInfo
+   * 接口ID：289237686
+   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-289237686
+   * */
+  setDeviceInfo: (params: SystemInfo) => postRequest<ResponseInfoType<null>>({
+    url: `${prefix}/setDeviceInfo`,
+    params,
   }),
 } 

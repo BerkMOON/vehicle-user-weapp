@@ -11,9 +11,11 @@ import { handleRequest } from '@/request'
 import { Dialog, Loading } from '@nutui/nutui-react-taro'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
+import { useAuth } from '@/hooks/useAuth'
 
 function Index() {
   const { isLogin, loginStatus } = useUserStore()
+  const { handleSetDeviceInfo } = useAuth()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
   const [connectDeivce, setConnectDevice] = useState<{
     sn: string,
@@ -31,7 +33,8 @@ function Index() {
     try {
       handleRequest({
         url: SettingAPI.getFirmwareVersion(),
-        errorMsg: '',
+        errorMsg: 'xxx',
+        needErrorTip: false,
         onSuccess: (data) => {
           const versionMatch = data.match(/Camera\.Menu\.FWversion=(.+)/)
           setConnectDevice({
@@ -94,19 +97,27 @@ function Index() {
     }
   }
 
+  const loopRequest = async (sn) => {
+    // 是目标设备的 WiFi，开始轮询
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+    timerRef.current = setInterval(() => checkConnection(sn), 1000)
+  }
+
   const handleWifiConnected = (res, sn) => {
     if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
-      // 是目标设备的 WiFi，开始轮询
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
-      timerRef.current = setInterval(() => checkConnection(sn), 1000)
+      loopRequest(sn)
+    } else if (res.wifi && !res.wifi.SSID) {
+      loopRequest(sn)
     }
   }
 
   useEffect(() => {
     if (connectDeivce.loading) {
-      Taro.onWifiConnected((res) => handleWifiConnected(res, connectDeivce.sn))
+      Taro.onWifiConnected((res) => {
+        handleWifiConnected(res, connectDeivce.sn)
+      })
     }
   }, [connectDeivce.loading])
 
@@ -148,6 +159,7 @@ function Index() {
         setDeviceList(res.data.device_list)
       }
       setLoading(false)
+      handleSetDeviceInfo()
     } catch (error) {
       console.error('获取设备列表失败:', error)
       setLoading(false)

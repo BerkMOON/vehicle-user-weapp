@@ -8,5 +8,12 @@ export interface LoginParams {
 export interface UserInfo {
   open_id: string;
   phone: string;
+  device_info: SystemInfo
 }
 
+export interface SystemInfo {
+  brand?: string
+  model?: string
+  platform?: string
+  system?: string
+}

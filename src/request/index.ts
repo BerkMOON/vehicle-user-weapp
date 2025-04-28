@@ -4,6 +4,7 @@ interface RequestConfig {
   url: string
   successMsg?: string
   errorMsg?: string
+  needErrorTip?: boolean
   onSuccess?: (data: any) => void
   onError?: (error: any) => void
 }
@@ -11,7 +12,7 @@ interface RequestConfig {
 
 // API 请求统一处理函数
 export const handleRequest = async (config: RequestConfig) => {
-  const { url, successMsg, errorMsg, onSuccess, onError } = config
+  const { url, successMsg, errorMsg, onSuccess, onError, needErrorTip = true } = config
   try {
     const res = await Taro.request({
       url,
@@ -29,10 +30,12 @@ export const handleRequest = async (config: RequestConfig) => {
     }
   } catch (error) {
     console.error(errorMsg, error)
-    Taro.showToast({
-      title: errorMsg || '操作失败',
-      icon: 'none'
-    })
+    if (!needErrorTip) {
+      Taro.showToast({
+        title: errorMsg || '操作失败',
+        icon: 'none'
+      })
+    }
     onError?.(error)
   }
 }
