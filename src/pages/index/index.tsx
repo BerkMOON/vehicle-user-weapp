@@ -33,7 +33,7 @@ function Index() {
     try {
       handleRequest({
         url: SettingAPI.getFirmwareVersion(),
-        errorMsg: 'xxx',
+        errorMsg: '',
         needErrorTip: false,
         onSuccess: (data) => {
           const versionMatch = data.match(/Camera\.Menu\.FWversion=(.+)/)
@@ -46,7 +46,6 @@ function Index() {
             clearInterval(timerRef.current)
             timerRef.current = null
           }
-          Taro.offWifiConnected()
           Taro.showToast({
             title: '设备已连接',
             icon: 'success'
@@ -70,7 +69,6 @@ function Index() {
         version: '',
         loading: false
       })
-      Taro.offWifiConnected()
       return
     }
     try {
@@ -82,6 +80,7 @@ function Index() {
             version: '',
             loading: true
           })
+          loopRequest(sn)
           connectWifi()
           Dialog.close('open_wifi')
         },
@@ -105,21 +104,21 @@ function Index() {
     timerRef.current = setInterval(() => checkConnection(sn), 1000)
   }
 
-  const handleWifiConnected = (res, sn) => {
-    if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
-      loopRequest(sn)
-    } else if (res.wifi && !res.wifi.SSID) {
-      loopRequest(sn)
-    }
-  }
+  // const handleWifiConnected = (res, sn) => {
+  //   if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
+  //     loopRequest(sn)
+  //   } else if (res.wifi && !res.wifi.SSID) {
+  //     loopRequest(sn)
+  //   }
+  // }
 
-  useEffect(() => {
-    if (connectDeivce.loading) {
-      Taro.onWifiConnected((res) => {
-        handleWifiConnected(res, connectDeivce.sn)
-      })
-    }
-  }, [connectDeivce.loading])
+  // useEffect(() => {
+  //   if (connectDeivce.loading) {
+  //     Taro.onWifiConnected((res) => {
+  //       handleWifiConnected(res, connectDeivce.sn)
+  //     })
+  //   }
+  // }, [connectDeivce.loading])
 
   const connectWifi = () => {
     Taro.startWifi({
