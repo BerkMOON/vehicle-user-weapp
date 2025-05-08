@@ -12,7 +12,7 @@ import BublePop from '@/components/BublePop'
 
 function Settings() {
   const [isRecording, setIsRecording] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
+  // const [isMuted, setIsMuted] = useState(false)
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [isFormatting, setIsFormatting] = useState(false)
   const [volume, setVolume] = useState(5)
@@ -45,10 +45,10 @@ function Settings() {
       errorMsg: '获取相机信息失败',
       onSuccess: (data) => {
         const recordMatch = data.match(/record=(\w+)/)
-        const audioMatch = data.match(/MovieAudio=(\w+)/)
-        if (recordMatch && audioMatch) {
+        // const audioMatch = data.match(/MovieAudio=(\w+)/)
+        if (recordMatch) {
           setIsRecording(recordMatch[1] === 'Recording')
-          setIsMuted(audioMatch[1] !== 'ON')
+          // setIsMuted(audioMatch[1] !== 'ON')
         }
       }
     })
@@ -95,14 +95,14 @@ function Settings() {
   }
 
   // 切换静音状态
-  const handleMuteToggle = (value: boolean) => {
-    handleRequest({
-      url: SettingAPI.setMute(value),
-      successMsg: value ? '已开启静音' : '已关闭静音',
-      errorMsg: '切换静音状态失败',
-      onSuccess: () => setIsMuted(value)
-    })
-  }
+  // const handleMuteToggle = (value: boolean) => {
+  //   handleRequest({
+  //     url: SettingAPI.setMute(value),
+  //     successMsg: value ? '已开启静音' : '已关闭静音',
+  //     errorMsg: '切换静音状态失败',
+  //     onSuccess: () => setIsMuted(value)
+  //   })
+  // }
 
   // 格式化存储
   const handleFormat = async () => {
@@ -272,13 +272,6 @@ function Settings() {
           <View onClick={() => setDurationPickerVisible(true)}>
             {RECORDING_DURATIONS.find(duration => duration.value === recordingDuration)?.text}
           </View>
-        </View>
-        <View className="setting-item">
-          <Text>静音录像</Text>
-          <Switch
-            checked={isMuted}
-            onChange={(e) => handleMuteToggle(e.detail.value)}
-          />
         </View>
       </View>
 

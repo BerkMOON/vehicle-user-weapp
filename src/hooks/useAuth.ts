@@ -50,9 +50,9 @@ export const useAuth = () => {
       if (response) {
         const userInfo = response.data
         setUserInfo({
-          phone: userInfo.phone,
-          openId: userInfo.open_id,
-          deviceInfo: userInfo.device_info
+          phone: userInfo?.phone,
+          openId: userInfo?.open_id,
+          deviceInfo: userInfo?.device_info
         })
         setLoginStatus('success')  // 设置登录状态为成功
       }

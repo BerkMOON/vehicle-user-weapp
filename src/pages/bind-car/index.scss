@@ -1,6 +1,12 @@
 .bind-car-page {
   padding: 16px;
   --nutui-color-primary: red;
+
+  --nutui-picker-item-height: 48px;
+
+  .nut-picker-roller-item-title {
+    font-size: 18px;
+  }
   
   .input-with-actions {
     display: flex;

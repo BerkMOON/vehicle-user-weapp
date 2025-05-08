@@ -1,10 +1,10 @@
 import { View } from '@tarojs/components'
-import { Form, Input, Button } from '@nutui/nutui-react-taro'
-import { Scan } from '@nutui/icons-react-taro'
+import { Form, Input, Button, Cell, Picker } from '@nutui/nutui-react-taro'
+import { ArrowRight, Scan } from '@nutui/icons-react-taro'
 import './index.scss'
 import Taro, { useRouter } from '@tarojs/taro'
 import { DeviceAPI } from '@/request/deviceApi'
-import { SuccessCode } from '@/constants/constants'
+import { Car_Brand_Options, Car_Options, SuccessCode } from '@/constants/constants'
 import { useUserStore } from '@/store/user'
 import { useEffect, useState } from 'react'
 import LoginPopup from '@/components/LoginPopup'
@@ -15,6 +15,8 @@ function BindCar() {
 
   const { userInfo: { phone } } = useUserStore()
   const [showLogin, setShowLogin] = useState(false)
+  const [carModel, setCarModel] = useState([])
+  const car = Form.useWatch('car', form)
 
   useEffect(() => {
     // 处理页面参数
@@ -124,8 +126,12 @@ function BindCar() {
   }
 
   const onSubmit = async (values) => {
+
+    const { car, car_model, ...parmas } = values
     const res = await DeviceAPI.bind({
-      ...values
+      ...parmas,
+      brand: car?.[0],
+      car_model: car_model?.[0]
     })
 
     if (res?.response_status.code === SuccessCode) {
@@ -186,20 +192,102 @@ function BindCar() {
           <Scan onClick={handleOCR} />
         </View>
 
-        <View className="input-with-actions">
-          <Form.Item
-            label="手机号"
-            name="phone"
-            rules={[{ pattern: /^1\d{10}$/, message: '请输入正确的手机号' }]}
-          >
-            <Input
-              className="form-input"
-              placeholder="请输入手机号"
-              type="text"
-              clearable
-            />
-          </Form.Item>
-        </View>
+        <Form.Item
+          label="手机号"
+          name="phone"
+          rules={[{ pattern: /^1\d{10}$/, message: '请输入正确的手机号' }]}
+        >
+          <Input
+            className="form-input"
+            placeholder="请输入手机号"
+            type="text"
+            clearable
+          />
+        </Form.Item>
+
+        <Form.Item
+          disabled
+          label="车辆品牌"
+          name="car"
+          trigger="onConfirm"
+          getValueFromEvent={(...args) => {
+            // 当品牌改变时，重置车型选择
+            setCarModel([])  // 重置状态
+            form.resetFields(['car_model'])  // 使用 resetFields 替代 setFieldsValue
+            return args[1]
+          }}
+          onClick={(_, ref: any) => {
+            ref.open()
+          }}
+        >
+          <Picker options={[Car_Brand_Options]}>
+            {(value: any) => {
+              return (
+                <Cell
+                  style={{
+                    padding: 0,
+                    //@ts-ignore
+                    '--nutui-cell-divider-border-bottom': '0',
+                  }}
+                  className="nutui-cell--clickable"
+                  title={
+                    value.length
+                      ? Car_Brand_Options.filter((po) => po.value === value[0])[0]
+                        ?.text
+                      : '请选择车辆品牌'
+                  }
+                  extra={<ArrowRight />}
+                  align="center"
+                />
+              )
+            }}
+          </Picker>
+        </Form.Item>
+
+        <Form.Item
+          label="车辆型号"
+          name="car_model"
+          trigger="onConfirm"
+          getValueFromEvent={(...args) => {
+            const selectedValue = args[1]
+            setCarModel(selectedValue)  // 更新状态
+            return selectedValue
+          }}
+          onClick={(_, ref: any) => {
+            if (!car) {
+              Taro.showToast({
+                title: '请先选择车辆品牌',
+                icon: 'none'
+              })
+              return
+            }
+            ref.open()
+          }}
+        >
+          <Picker
+            value={carModel}
+            options={[Car_Options[car]]}>
+            {(value: any) => {
+              const displayValue = value.length ? value[0] : ''
+              const options = Car_Options[car] || []
+              const selectedOption = options.find((po) => po.value === displayValue)
+              
+              return (
+                <Cell
+                  style={{
+                    padding: 0,
+                    //@ts-ignore
+                    '--nutui-cell-divider-border-bottom': '0',
+                  }}
+                  className="nutui-cell--clickable"
+                  title={selectedOption?.text || '请选择车辆型号'}
+                  extra={<ArrowRight />}
+                  align="center"
+                />
+              )
+            }}
+          </Picker>
+        </Form.Item>
 
         <View className="form-actions">
           {

@@ -231,7 +231,6 @@ function Index() {
                 <View className="device-info">
                   <View className="device-id">设备号：{device.sn}</View>
                   <View className="vin">车架号：{device.vin}</View>
-                  <View className="vin">绑定手机号：{device.phone}</View>
                   {
                     connectDeivce?.sn === device.sn && connectDeivce.version && <View className="vin">
                       <View> 固件版本号：</View>
