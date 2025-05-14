@@ -12,6 +12,7 @@ import { Dialog, Loading } from '@nutui/nutui-react-taro'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
 import { useAuth } from '@/hooks/useAuth'
+import { ParkingCard } from './Components/Parking'
 
 function Index() {
   const { isLogin, loginStatus } = useUserStore()
@@ -104,22 +105,6 @@ function Index() {
     timerRef.current = setInterval(() => checkConnection(sn), 1000)
   }
 
-  // const handleWifiConnected = (res, sn) => {
-  //   if (res.wifi && res.wifi.SSID.startsWith('SG10')) {
-  //     loopRequest(sn)
-  //   } else if (res.wifi && !res.wifi.SSID) {
-  //     loopRequest(sn)
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (connectDeivce.loading) {
-  //     Taro.onWifiConnected((res) => {
-  //       handleWifiConnected(res, connectDeivce.sn)
-  //     })
-  //   }
-  // }, [connectDeivce.loading])
-
   const connectWifi = () => {
     Taro.startWifi({
       success: function () {
@@ -201,7 +186,7 @@ function Index() {
       <View className="device-section">
         <View className="section-header">
           <View className="title">
-            <Computer style={{ marginRight: '5px' }} />我的设备
+            <Computer color='#2193b0' style={{ marginRight: '5px' }} />我的设备
           </View>
           {isLogin && deviceList.length > 0 && (
             <Button
@@ -284,6 +269,8 @@ function Index() {
           </View>
         )}
       </View>
+      
+      <ParkingCard deviceIds={deviceList.map(list => list.device_id)}></ParkingCard>
 
       <View
         className="manual-card"

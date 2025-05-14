@@ -1,0 +1,105 @@
+.parking-card {
+  .device-section {
+    .section-header {
+      .title {
+        display: flex;
+        align-items: center;
+
+        .nut-icon {
+          margin-right: 8px;
+          color: #2193b0;
+        }
+
+        .title-text {
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .park-warning {
+      .device-item {
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:not(:last-child) {
+          border-bottom: 1px solid #f5f5f5;
+        }
+
+        .device-info {
+          flex: 1;
+
+          .device-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+          }
+
+          .device-time {
+            font-size: 13px;
+            color: #999;
+          }
+
+          .location {
+            font-size: 13px;
+            color: #2193B0;
+          }
+        }
+      }
+    }
+
+    .more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: #2193b0;
+      font-size: 14px;
+
+      .nut-icon {
+        margin-left: 4px;
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 0;
+      color: #999;
+      font-size: 14px;
+    }
+  }
+}
+
+
+.sn-group {
+  margin-bottom: 16px;
+
+  .sn-header {
+    padding: 8px 16px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+
+    .sn-text {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .sn-more {
+      color: #2193b0;
+      font-size: 14px;
+    }
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

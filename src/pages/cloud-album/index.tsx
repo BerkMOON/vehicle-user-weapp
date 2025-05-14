@@ -5,7 +5,7 @@ import { CloudAPI } from '@/request/cloudApi'
 import { DeviceAPI } from '@/request/deviceApi'
 import { Photos } from '@/request/cloudApi/typings'
 import { DeviceInfo } from '@/request/deviceApi/typings'
-import { Empty, Grid, Loading } from '@nutui/nutui-react-taro'
+import { Empty, Loading } from '@nutui/nutui-react-taro'
 import emptyImg from '@/assets/empty.png'
 import { useUserStore } from '@/store/user'
 import NotLogin from '@/components/NotLogin'
@@ -212,30 +212,6 @@ export default function CloudAlbum() {
               image={emptyImg}
             />
           ) : (
-            // <View className='photo-grid'>
-            //   <Grid columns={3}>
-            //     {mediaList.map(item => (
-            //       <Grid.Item
-            //         text={`拍摄时间:${item.created_time?.split(' ')[1]}` || ''}
-            //         key={item.id}
-            //         onClick={() => selectedPreviewToPlay(item)}>
-            //         {selectedType === 'videos' ? (
-            //           <Image
-            //             src={item.url}
-            //             loading={<PlayStart />}
-            //             error={<PlayStart />}
-            //             className='photo-image'
-            //           />
-            //         ) : (
-            //           <Image
-            //             src={item.url}
-            //             className='photo-image'
-            //           />
-            //         )}
-            //       </Grid.Item>
-            //     ))}
-            //   </Grid>
-            // </View>
             <View className="files-grid">
               {mediaList.map((file) => (
                 <View

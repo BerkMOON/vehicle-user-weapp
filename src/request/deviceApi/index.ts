@@ -2,7 +2,8 @@ import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
 import {
   BindParams,
-  DeviceList
+  DeviceList,
+  ParkingList
 } from './typings.d'
 
 const prefix = TARO_APP_API_BASE_URL + '/api/consumer/device'
@@ -41,4 +42,17 @@ export const DeviceAPI = {
       sn
     }
   }),
+
+
+  /**
+   * 停车监控列表
+   * GET  /api/consumer/device/listParkingMonitors
+   * 接口ID：295241762
+   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-295241762
+   */
+
+  parkList: (params) => getRequest<ResponseInfoType<ParkingList>>({
+    url: `${prefix}/listParkingMonitors`,
+    params
+  })
 }

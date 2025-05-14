@@ -3,6 +3,7 @@ import { useUserStore } from '@/store/user'
 import { UserAPI } from '@/request/useApi'
 import { generateNonce, generateSignature, getSecondTimestamp } from '@/utils/utils'
 import Taro from '@tarojs/taro'
+import { SuccessCode } from '@/constants/constants'
 
 let isInitialized = false
 let isLoginRetrying = false  // 添加重试标记
@@ -47,7 +48,7 @@ export const useAuth = () => {
     if (isLoginRetrying) return
     try {
       const response = await UserAPI.getUserInfo()
-      if (response) {
+      if (response?.response_status.code === SuccessCode) {
         const userInfo = response.data
         setUserInfo({
           phone: userInfo?.phone,
@@ -55,6 +56,8 @@ export const useAuth = () => {
           deviceInfo: userInfo?.device_info
         })
         setLoginStatus('success')  // 设置登录状态为成功
+      } else {
+        await handleWxLogin()
       }
     } catch (error) {
       console.error('获取用户信息失败：', error)

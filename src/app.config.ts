@@ -10,6 +10,7 @@ export default defineAppConfig({
     'pages/bind-car/index',
     'pages/cloud-album/index',  // 添加云相册页面
     'pages/terms/index',
+    'pages/parking-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -52,6 +53,6 @@ export default defineAppConfig({
     },
     "scope.camera": {
       "desc": "用于拍照识别文字"
-    }
+    },
   },
 })
