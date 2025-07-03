@@ -14,8 +14,7 @@ export interface FileGroup {
 }
 
 export interface DownloadItem extends FileItem {
-  progress: number
-  status: 'downloading' | 'paused' | 'success' | 'failed'
+  progress?: number
   tempFilePath?: string
   savedPath?: string
 }

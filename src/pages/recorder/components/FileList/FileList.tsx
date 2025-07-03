@@ -7,15 +7,11 @@ import emptyImg from '@/assets/empty.png'
 
 interface FileListProps {
   fileList: FileGroup[]
-  // isSelectMode: boolean
-  // onFileSelect: (groupIndex: number, fileIndex: number) => void
   onFileClick: (file: FileItem) => void
 }
 
 export const FileList: React.FC<FileListProps> = ({
   fileList,
-  // isSelectMode,
-  // onFileSelect,
   onFileClick
 }) => {
   return (

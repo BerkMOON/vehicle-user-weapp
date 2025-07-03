@@ -27,6 +27,13 @@ export const useAuth = () => {
         signature,
         timestamp,
       })
+      if (response?.data.response_status.code !== SuccessCode) {
+        Taro.showToast({
+          title: '登录失败，请稍后重试',
+          icon: 'none'
+        })
+        return
+      }
 
       if (response?.header['Set-Cookie']) {
         Taro.setStorageSync('cookies', response?.header['Set-Cookie'])

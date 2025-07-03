@@ -30,7 +30,7 @@ export const handleRequest = async (config: RequestConfig) => {
     }
   } catch (error) {
     console.error(errorMsg, error)
-    if (!needErrorTip) {
+    if (needErrorTip) {
       Taro.showToast({
         title: errorMsg || '操作失败',
         icon: 'none'

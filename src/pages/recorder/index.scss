@@ -45,7 +45,7 @@
     }
 
     .download-btn {
-      background: #007AFF;
+      background: #007aff;
       color: #fff;
       font-size: 14px;
       border-radius: 16px;
@@ -82,6 +82,19 @@
       color: #333;
       font-size: 14px;
     }
+  }
+}
+
+.wrapper {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  .file-size {
+    color: #8c8c8c;
+    font-size: 14px;
   }
 }
 

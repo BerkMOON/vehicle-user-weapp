@@ -72,7 +72,17 @@ function Index() {
       })
       return
     }
+
     try {
+      const deviceInfo = Taro.getDeviceInfo()
+      if (deviceInfo.platform === 'ohos') {
+        Taro.showModal({
+          title: '抱歉',
+          content: '由于华为手机和微信的适配问题，暂不支持连接设备',
+          showCancel: false
+        })
+        return
+      }
       Dialog.open('open_wifi', {
         title: '连接设备WiFi',
         onConfirm: () => {
@@ -269,7 +279,7 @@ function Index() {
           </View>
         )}
       </View>
-      
+
       <ParkingCard deviceIds={deviceList.map(list => list.device_id)}></ParkingCard>
 
       <View
@@ -282,6 +292,9 @@ function Index() {
 
       <Dialog id="open_wifi">
         <>
+          <View className="dialog-title">
+            请按照以下步骤操作：
+          </View>
           <View className="dialog-title">
             1. 语音说出"打开WiFi"，切换记录仪至WiFi模式
           </View>

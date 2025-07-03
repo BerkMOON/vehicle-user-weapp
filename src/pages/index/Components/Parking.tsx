@@ -104,6 +104,7 @@ export const ParkingCard = (props: {
             <View className="device-info">
               <View className="device-name">车辆在熄火后有晃动，请检查车辆是否剐蹭</View>
               <View className="device-time">{item.occur_time}</View>
+              <View className="device-time">设备SN：{item.sn}</View>
               {
                 Number(item.lat) && Number(item.lng) ? (
                   <View className='location' onClick={() => handleLocation(item)}>查看位置</View>
@@ -112,7 +113,7 @@ export const ParkingCard = (props: {
             </View>
           </View>
         ))}
-        <View className="more" onClick={() => handleViewMore(deviceIds[0])}>
+        <View className="more" onClick={() => handleViewMore(warningInfo[0].deviceId)}>
           查看详情 <ArrowRight size={14} />
         </View>
       </>
