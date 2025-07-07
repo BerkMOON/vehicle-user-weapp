@@ -13,7 +13,7 @@ import NotBind from '@/components/NotBind'
 import { PlayStart } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 import { formatFileSize } from '@/utils/utils'
-
+import DefaultPng from '@/assets/default.png'
 
 export default function CloudAlbum() {
   const { isLogin } = useUserStore()
@@ -226,7 +226,7 @@ export default function CloudAlbum() {
                       <View className="video-thumbnail">
                         <PlayStart size={30} style={{ zIndex: 1 }} />
                         <Image
-                          src={file.url || ''}
+                          src={DefaultPng}
                           className="thumbnail"
                           mode="aspectFill"
                         />

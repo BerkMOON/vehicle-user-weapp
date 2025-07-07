@@ -16,3 +16,8 @@ export interface PageInfo {
   total_count: number;
   total_page: number;
 }
+
+export interface Pagination {
+  page: number;
+  limit: number;
+}

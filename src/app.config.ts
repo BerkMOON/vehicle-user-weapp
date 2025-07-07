@@ -11,7 +11,8 @@ export default defineAppConfig({
     'pages/cloud-album/index',  // 添加云相册页面
     'pages/terms/index',
     'pages/parking-detail/index',
-    'pages/video-player/index'
+    'pages/video-player/index',
+    'pages/emergency/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -30,6 +31,12 @@ export default defineAppConfig({
         text: '首页',
         iconPath: './assets/tabbar/home.png',
         selectedIconPath: './assets/tabbar/home-active.png'
+      },
+      {
+        pagePath: 'pages/emergency/index',
+        text: '紧急视频',
+        iconPath: './assets/tabbar/monitor.png',
+        selectedIconPath: './assets/tabbar/monitor-active.png'
       },
       {
         pagePath: 'pages/cloud-album/index',
