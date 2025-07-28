@@ -1,5 +1,5 @@
 import Taro from "@tarojs/taro"
-import { LoginParams, SystemInfo, UserInfo } from "./typings"
+import { InstructionParams, InstructionResponse, LoginParams, SystemInfo, UserInfo } from "./typings"
 import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
 
@@ -48,6 +48,17 @@ export const UserAPI = {
    * */
   setDeviceInfo: (params: SystemInfo) => postRequest<ResponseInfoType<null>>({
     url: `${prefix}/setDeviceInfo`,
+    params,
+  }),
+
+  /**
+   * 获取用户说明
+   * GET /api/consumer/wx/static/getInstruction
+   * 接口ID：327701533
+   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-327701533
+   */
+  getInstruction: (params: InstructionParams) => getRequest<ResponseInfoType<InstructionResponse>>({
+    url: `${prefix}/static/getInstruction`,
     params,
   }),
 } 

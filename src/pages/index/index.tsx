@@ -30,6 +30,8 @@ function Index() {
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
   const [loading, setLoading] = useState(true)
 
+  const deviceInfo = Taro.getDeviceInfo()
+
   const checkConnection = async (sn: string) => {
     try {
       handleRequest({
@@ -74,7 +76,6 @@ function Index() {
     }
 
     try {
-      const deviceInfo = Taro.getDeviceInfo()
       if (deviceInfo.platform === 'ohos') {
         Taro.showModal({
           title: '抱歉',
@@ -118,7 +119,6 @@ function Index() {
   const connectWifi = () => {
     Taro.startWifi({
       success: function () {
-        const deviceInfo = Taro.getDeviceInfo()
         if (deviceInfo.platform === 'android') {
           Taro.connectWifi({
             SSID: 'SG10_XXX',
@@ -292,6 +292,12 @@ function Index() {
 
       <Dialog id="open_wifi">
         <>
+          {
+            deviceInfo.platform === 'ios' &&
+            <View className="dialog-info">
+              {`Ios系统连接前，请进入设置 -> APP -> 微信 -> 本地网络设置，打开本地网络设置`}
+            </View>
+          }
           <View className="dialog-title">
             请按照以下步骤操作：
           </View>

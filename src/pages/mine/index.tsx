@@ -1,13 +1,15 @@
 import { View, Text, Canvas } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
-import { ArrowSize8, Receipt, Voucher, QrCode, User, ArrowExchange } from '@nutui/icons-react-taro'
+import { ArrowSize8, Receipt, Voucher, QrCode, User, ArrowExchange, Video } from '@nutui/icons-react-taro'
 import { Avatar, Popup, Button } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useUserStore } from '@/store/user'
 import drawQrcode from 'weapp-qrcode'
 import { useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'  // 添加这行导入
+import { UserAPI } from '@/request/useApi'
+import { FileType } from '@/request/useApi/typings.d'
 
 function Mine() {
   const { userInfo: { openId, phone } } = useUserStore()
@@ -38,6 +40,90 @@ function Mine() {
   const getPhoneNumber = async (e) => {
     await handleGetPhoneNumber(e.detail.code)
   }
+
+  const previewPDF = async () => {
+    Taro.showLoading({
+      title: '加载中',
+    })
+
+    try {
+      const res = await UserAPI.getInstruction({
+        needSynopsisPdf: true,
+        needSynopsisVideo: false,
+      })
+
+      const pdfItem = res?.data.item_list.find(item => item.file_type === FileType.SynopsisPdf)
+
+      if (pdfItem) {
+        Taro.downloadFile({
+          url: pdfItem.url,
+          success: (res) => {
+            Taro.hideLoading()
+            Taro.openDocument({
+              filePath: res.tempFilePath,
+              fileType: 'pdf',
+            });
+          },
+          fail: (err) => {
+            Taro.hideLoading()
+            console.error('下载失败', err)
+          },
+        });
+      } else {
+        Taro.hideLoading()
+        Taro.showToast({
+          title: '未找到PDF文件',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      Taro.showToast({
+        title: '获取PDF失败，请重试',
+        icon: 'none',
+      })
+      console.error('获取指令失败', error)
+      return
+    }
+  };
+
+  const previewVideo = async () => {
+    Taro.showLoading({
+      title: '加载中',
+    })
+    try {
+      const res = await UserAPI.getInstruction({
+        needSynopsisPdf: false,
+        needSynopsisVideo: true,
+      })
+
+      const videoItem = res?.data.item_list.find(item => item.file_type === FileType.SynopsisVideo)
+
+      if (videoItem) {
+        Taro.hideLoading()
+        Taro.previewMedia({
+          sources: [{
+            url: videoItem.url,
+            type: 'video',
+          }]
+        })
+      } else {
+        Taro.hideLoading()
+        Taro.showToast({
+          title: '未找到视频文件',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      Taro.showToast({
+        title: '获取视频失败，请重试',
+        icon: 'none',
+      })
+      console.error('获取指令失败', error)
+      return
+    }
+  };
 
   return (
     <View className="mine-page" ref={componentRef}>
@@ -88,6 +174,32 @@ function Mine() {
           <View className="menu-item-left">
             <QrCode className="menu-icon" size={16} />
             <Text>生成二维码</Text>
+          </View>
+          <Text className="arrow">
+            <ArrowSize8 size={14} />
+          </Text>
+        </View>
+      </View>
+
+      <View className="section-title">使用说明</View>
+
+      <View className="menu-list">
+        <View className="menu-item"
+          onClick={previewPDF}
+        >
+          <View className="menu-item-left">
+            <Receipt className="menu-icon" size={16} />
+            <Text>使用手册</Text>
+          </View>
+          <Text className="arrow">
+            <ArrowSize8 size={14} />
+          </Text>
+        </View>
+
+        <View className="menu-item" onClick={previewVideo}>
+          <View className="menu-item-left">
+            <Video className="menu-icon" size={16} />
+            <Text>使用视频</Text>
           </View>
           <Text className="arrow">
             <ArrowSize8 size={14} />

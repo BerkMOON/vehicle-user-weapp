@@ -17,3 +17,20 @@ export interface SystemInfo {
   platform?: string
   system?: string
 }
+
+export interface InstructionParams {
+  needSynopsisPdf: boolean,
+  needSynopsisVideo: boolean
+}
+
+export enum FileType {
+  SynopsisPdf = 'synopsis_pdf',
+  SynopsisVideo = 'synopsis_video',
+}
+
+export interface InstructionResponse {
+  item_list: {
+    url: string;
+    file_type: FileType;
+  }[]
+}
