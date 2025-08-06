@@ -76,11 +76,25 @@ function Index() {
     }
 
     try {
-      if (deviceInfo.platform === 'ohos') {
+      if (deviceInfo.brand === 'HUAWEI') {
         Taro.showModal({
-          title: '抱歉',
-          content: '由于华为手机和微信的适配问题，暂不支持连接设备',
-          showCancel: false
+          title: '华为手机专属提示',
+          content: '华为手机暂时无法在微信小程序内连接设备。\n\n请使用浏览器版本：\n1. 点击确定复制网址\n2. 打开手机浏览器\n3. 粘贴网址访问\n\n功能完全一样，操作更流畅！',
+          showCancel: false,
+          success: (res) => {
+            if (res.confirm) {
+              Taro.setClipboardData({
+                data: 'http://eda-mini-program.ai-kaka.com/',
+                success: () => {
+                  Taro.showToast({
+                    title: '网址已复制，请打开浏览器粘贴',
+                    icon: 'success',
+                    duration: 3000
+                  })
+                }
+              })
+            }
+          }
         })
         return
       }
@@ -289,6 +303,29 @@ function Index() {
         <View className="manual-title">使用手册</View>
         <View className="manual-desc">了解记录仪使用方法</View>
       </View>
+
+      {
+        deviceInfo.brand == 'HUAWEI' &&
+        <View
+          className="huawei-notice-card"
+          onClick={() => {
+            Taro.setClipboardData({
+              data: 'http://eda-mini-program.ai-kaka.com/',
+              success: () => {
+                Taro.showToast({
+                  title: '网址已复制，请打开浏览器粘贴访问',
+                  icon: 'success',
+                  duration: 3000
+                })
+              }
+            })
+          }}
+        >
+          <View className="huawei-notice-title">🔧 华为用户专用通道</View>
+          <View className="huawei-notice-desc">点击复制网址，用浏览器打开，去进行设备连接，连接后调整设备设置及查看下载设备视频</View>
+          <View className="huawei-notice-tip">📱 推荐使用华为浏览器或Chrome</View>
+        </View>
+      }
 
       <Dialog id="open_wifi">
         <>
