@@ -174,6 +174,19 @@ function Index() {
     }
   }
 
+  const copyUrl = () => {
+    Taro.setClipboardData({
+      data: 'http://eda-mini-program.ai-kaka.com/',
+      success: () => {
+        Taro.showToast({
+          title: '网址已复制',
+          icon: 'success',
+          duration: 3000
+        })
+      }
+    })
+  }
+
   useEffect(() => {
     // 只有当登录状态为 success 时才获取设备列表
     if (isLogin && loginStatus === 'success') {
@@ -305,26 +318,25 @@ function Index() {
       </View>
 
       {
-        deviceInfo.brand == 'HUAWEI' &&
-        <View
-          className="huawei-notice-card"
-          onClick={() => {
-            Taro.setClipboardData({
-              data: 'http://eda-mini-program.ai-kaka.com/',
-              success: () => {
-                Taro.showToast({
-                  title: '网址已复制，请打开浏览器粘贴访问',
-                  icon: 'success',
-                  duration: 3000
-                })
-              }
-            })
-          }}
-        >
-          <View className="huawei-notice-title">🔧 华为用户专用通道</View>
-          <View className="huawei-notice-desc">点击复制网址，用浏览器打开，去进行设备连接，连接后调整设备设置及查看下载设备视频</View>
-          <View className="huawei-notice-tip">📱 推荐使用华为浏览器或Chrome</View>
-        </View>
+        deviceInfo.brand == 'HUAWEI' ?
+          <View
+            className="huawei-notice-card"
+            onClick={copyUrl}
+          >
+            <View className="huawei-notice-title">🔧 华为用户专用通道</View>
+            <View className="huawei-notice-desc">点击复制网址，用浏览器打开，去进行设备连接，连接后调整设备设置及查看下载设备视频</View>
+            <View className="huawei-notice-tip">📱 推荐使用华为浏览器或Chrome</View>
+          </View> :
+          <View
+            className="manual-card"
+            onClick={copyUrl}
+          >
+            <View className="manual-title">部分手机连接设备失败看这里</View>
+            <View className="manual-desc">
+              <View>无法连接点击这里，复制链接，之后在浏览器打开即可</View>
+              <View>部分手机因为手机系统问题，无法连接设备，需要在浏览器打开链接进行后在网页操作</View>
+            </View>
+          </View>
       }
 
       <Dialog id="open_wifi">
