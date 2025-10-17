@@ -151,9 +151,9 @@ function Mine() {
         </Button>
       </View>
 
-      <View className="section-title">我的</View>
+      {/* <View className="section-title">我的</View>
       {/* 菜单列表 */}
-      <View className="menu-list">
+      {/* <View className="menu-list">
         <View className="menu-item"
           onClick={() => {
             Taro.navigateTo({
@@ -179,7 +179,7 @@ function Mine() {
             <ArrowSize8 size={14} />
           </Text>
         </View>
-      </View>
+      </View>  */}
 
       <View className="section-title">使用说明</View>
 

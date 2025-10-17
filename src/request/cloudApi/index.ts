@@ -61,4 +61,18 @@ export const CloudAPI = {
       id
     }
   }),
+
+  /**
+  oss文件删除
+  POST /api/consumer/wx/delCloudObject
+  接口ID：362456769
+  接口地址：https://app.apifox.com/link/project/5846841/apis/api-362456769  
+   */
+  delCloudObject: ({ device_id, path }) => postRequest<ResponseInfoType<null>>({
+    url: `${prefix}/delCloudObject`,
+    params: {
+      path,
+      device_id
+    }
+  }),
 } 

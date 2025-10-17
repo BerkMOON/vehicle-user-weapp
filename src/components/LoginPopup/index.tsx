@@ -44,7 +44,7 @@ function LoginPopup({ visible, onClose }: LoginPopupProps) {
               }
             }}
           >
-            微信一键登录
+           手机号快捷登录
           </Button>
           
           <View className='agreement'>

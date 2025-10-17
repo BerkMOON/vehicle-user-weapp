@@ -10,7 +10,7 @@ import emptyImg from '@/assets/empty.png'
 import { useUserStore } from '@/store/user'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
-import { PlayStart } from '@nutui/icons-react-taro'
+import { PlayStart, Del } from '@nutui/icons-react-taro'
 import Taro from '@tarojs/taro'
 import { formatFileSize } from '@/utils/utils'
 import DefaultPng from '@/assets/default.png'
@@ -124,6 +124,48 @@ export default function CloudAlbum() {
     }
   }
 
+  // 删除照片/视频
+  const handleDelete = async (item: Photos) => {
+    try {
+      const res = await Taro.showModal({
+        title: '确认删除',
+        content: `确定要删除这个${selectedType === 'videos' ? '视频' : '照片'}吗？删除后无法恢复。`,
+        confirmText: '确认删除',
+        cancelText: '取消'
+      })
+
+      if (res.confirm) {
+        try {
+          // 从完整URL中提取路径部分
+          const url = new URL(item.url)
+          const pathMatch = url.pathname.match(/\/test\/cloud\/.*$/)
+          const path = pathMatch ? pathMatch[0].substring(1) : '' // 移除开头的斜杠
+
+          await CloudAPI.delCloudObject({
+            path,
+            device_id: devices.find(device => device.sn === selectedDevice)?.device_id || ''
+          })
+
+          // 删除成功后从列表中移除该项
+          setMediaList(prev => prev.filter(mediaItem => mediaItem.id !== item.id))
+
+          Taro.showToast({
+            title: '删除成功',
+            icon: 'success'
+          })
+        } catch (error) {
+          console.error('删除失败：', error)
+          Taro.showToast({
+            title: '删除失败',
+            icon: 'error'
+          })
+        }
+      }
+    } catch (error) {
+      console.error('显示确认对话框失败：', error)
+    }
+  }
+
   if (!isLogin) {
     return <NotLogin></NotLogin>
   }
@@ -217,11 +259,13 @@ export default function CloudAlbum() {
                 <View
                   key={`${file.id}-${file.created_time}`}
                   className="file-item"
-                  onClick={() => {
-                    selectedPreviewToPlay(file)
-                  }}
                 >
-                  <View className="thumbnail-wrapper">
+                  <View
+                    className="thumbnail-wrapper"
+                    onClick={() => {
+                      selectedPreviewToPlay(file)
+                    }}
+                  >
                     {selectedType === 'videos' ? (
                       <View className="video-thumbnail">
                         <PlayStart size={30} style={{ zIndex: 1 }} />
@@ -238,16 +282,26 @@ export default function CloudAlbum() {
                         mode="aspectFill"
                       />
                     )}
-
                   </View>
+
                   <View className="file-info">
                     <View className="info-row">
                       <Text className="label">时间:</Text>
                       <Text className="time">{file.created_time?.split(' ')[1]}</Text>
                     </View>
-                    <View className="info-row">
-                      <Text className="label">大小:</Text>
-                      <Text className="size">{formatFileSize(file.size)}</Text>
+                    <View className="info-row" style={{ justifyContent: 'space-between' }}>
+                      <View>
+                        <Text className="label">大小:</Text>
+                        <Text className="size">{formatFileSize(file.size)}</Text>
+                      </View>
+                      <Del
+                        style={{ marginTop: '3px' }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(file)
+                        }}
+                        size={12}
+                      />
                     </View>
                   </View>
                 </View>
