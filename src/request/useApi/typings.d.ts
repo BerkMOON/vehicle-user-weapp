@@ -20,12 +20,14 @@ export interface SystemInfo {
 
 export interface InstructionParams {
   needSynopsisPdf: boolean,
-  needSynopsisVideo: boolean
+  needSynopsisVideo: boolean,
+  system?: 'android' | 'ios' | 'huawei'
 }
 
 export enum FileType {
   SynopsisPdf = 'synopsis_pdf',
   SynopsisVideo = 'synopsis_video',
+  instructionVideo = 'instruction_video',
 }
 
 export interface InstructionResponse {

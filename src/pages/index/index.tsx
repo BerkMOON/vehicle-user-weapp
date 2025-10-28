@@ -1,18 +1,20 @@
-import { Button, View } from '@tarojs/components'
+import { Button, View, Image } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
 import { useEffect, useState, useRef } from 'react'  // 添加 useRef
 import { useUserStore } from '@/store/user'
 import { DeviceAPI } from '@/request/deviceApi'
 import { DeviceInfo } from '@/request/deviceApi/typings.d'
-import { Computer } from '@nutui/icons-react-taro'
+import { Computer, PlayStart } from '@nutui/icons-react-taro'
 import { SettingAPI } from '@/request/settingApi'
 import { handleRequest } from '@/request'
-import { Dialog, Loading } from '@nutui/nutui-react-taro'
+import { Dialog, Loading, Tour } from '@nutui/nutui-react-taro'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
 import { useAuth } from '@/hooks/useAuth'
 import { ParkingCard } from './Components/Parking'
+import { UserAPI } from '@/request/useApi'
+import postImg from '@/assets/post.jpg'
 
 function Index() {
   const { isLogin, loginStatus } = useUserStore()
@@ -29,8 +31,60 @@ function Index() {
   })
   const timerRef = useRef<any>(null)  // 使用 useRef 存储定时器
   const [loading, setLoading] = useState(true)
+  // const [showTour, setShowTour] = useState(false)
 
   const deviceInfo = Taro.getDeviceInfo()
+
+  // Tour引导步骤配置 - 根据当前状态动态生成
+  // const getTourSteps = () => {
+  //   const steps: Array<{
+  //     content: string;
+  //     target: string;
+  //     popoverOffset?: number[];
+  //     arrowOffset?: number;
+  //     location?: string
+  //   }> = []
+    
+  //   // 如果有设备，添加查看设备步骤
+  //   if (deviceList.length > 0) {
+  //     steps.push({
+  //       content: '连接设备后，点击这里可以查看设备录制的视频和照片',
+  //       target: 'view-device-btn',
+  //       popoverOffset: [260, 8],
+  //       arrowOffset: -260,
+  //     })
+  //   }
+    
+  //   // 添加视频教程步骤
+  //   steps.push({
+  //     content: '点击这里可以学习如何连接设备的详细视频教程',
+  //     target: 'video-tutorial-btn',
+  //     popoverOffset: [-120, 8],
+  //     arrowOffset: 120,
+  //     location: 'top-start',
+  //   })
+    
+  //   // 如果有设备，添加添加设备步骤
+  //   if (deviceList.length > 0) {
+  //     steps.push({
+  //       content: '点击这里可以添加新设备，绑定您的行车记录仪',
+  //       target: 'add-device-btn',
+  //       popoverOffset: [0, 8],
+  //     })
+  //   }
+    
+  //   return steps
+  // }
+
+  // const closeTour = () => {
+  //   setShowTour(false)
+  //   // 保存用户已完成引导的状态
+  //   Taro.setStorageSync('hasCompletedTour', true)
+  // }
+
+  // const startTour = () => {
+  //   setShowTour(true)
+  // }
 
   const checkConnection = async (sn: string) => {
     try {
@@ -194,6 +248,19 @@ function Index() {
     }
   }, [isLogin, loginStatus])  // 添加 loginStatus 作为依赖
 
+  // // 检查是否需要显示引导
+  // useEffect(() => {
+  //   if (isLogin && loginStatus === 'success') {
+  //     // const hasCompletedTour = Taro.getStorageSync('hasCompletedTour')
+  //     // if (!hasCompletedTour) {
+  //       // 延迟显示引导，确保页面已完全加载
+  //       setTimeout(() => {
+  //         setShowTour(true)
+  //       }, 1000)
+  //     // }
+  //   }
+  // }, [isLogin, loginStatus])
+
   const handleUnbind = async (sn: string) => {
     try {
       const res = await DeviceAPI.unbind(sn)
@@ -217,6 +284,49 @@ function Index() {
     }
   }
 
+  const previewVideo = async () => {
+    Taro.showLoading({
+      title: '加载中',
+    })
+
+    const system = deviceInfo.brand === 'HUAWEI' ? 'huawei' : deviceInfo.platform === 'android' ? 'android'
+      : 'ios';
+    
+    try {
+      const res = await UserAPI.getInstruction({
+        needSynopsisPdf: false,
+        needSynopsisVideo: false,
+        system,
+      })
+
+      const videoItem = res?.data.item_list?.[0];
+
+      if (videoItem) {
+        Taro.hideLoading()
+        Taro.previewMedia({
+          sources: [{
+            url: videoItem.url,
+            type: 'video',
+          }]
+        })
+      } else {
+        Taro.hideLoading()
+        Taro.showToast({
+          title: '未找到视频文件',
+          icon: 'none',
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      Taro.showToast({
+        title: '获取视频失败，请重试',
+        icon: 'none',
+      })
+      console.error('获取指令失败', error)
+      return
+    }
+  };
+
   return (
     <View className="page">
       <View className='header'></View>
@@ -227,6 +337,7 @@ function Index() {
           </View>
           {isLogin && deviceList.length > 0 && (
             <Button
+              id="add-device-btn"
               className="add-btn"
               onClick={() => Taro.navigateTo({ url: '/pages/bind-car/index' })}
             >
@@ -271,6 +382,7 @@ function Index() {
                 </View>
                 <View className="device-actions">
                   <Button
+                    id="view-device-btn"
                     className="action-btn"
                     onClick={() => Taro.navigateTo({ url: '/pages/recorder/index' })}
                     disabled={!(connectDeivce?.sn === device.sn && connectDeivce.version)}  // 添加设备连接状态判断
@@ -310,6 +422,28 @@ function Index() {
       <ParkingCard deviceIds={deviceList.map(list => list.device_id)}></ParkingCard>
 
       <View
+        id="video-tutorial-btn"
+        className="video-card"
+        onClick={previewVideo}
+      >
+        <View className="video-thumbnail">
+          <Image
+            src={postImg}
+            className="thumbnail-image"
+            mode="aspectFill"
+          />
+          <View className="play-overlay">
+            <PlayStart size={40} color="#fff" />
+          </View>
+        </View>
+        <View className="video-info">
+          <View className="video-title">连接设备视频</View>
+          <View className="video-desc">快速学习如何连接设备</View>
+        </View>
+      </View>
+
+      <View
+        id="manual-btn"
         className="manual-card"
         onClick={() => Taro.navigateTo({ url: '/pages/manual/index' })}
       >
@@ -373,6 +507,29 @@ function Index() {
           </View>
         </>
       </Dialog>
+
+      {/* Tour引导组件 */}
+      {/* <Tour
+        visible={showTour}
+        onClose={closeTour}
+        list={getTourSteps()}
+        location="bottom-end"
+        maskWidth={50}
+        maskHeight={50}
+        offset={[0, 0]}
+      /> */}
+
+      {/* 手动启动引导的按钮 */}
+      {/* {isLogin && (
+        <View className="tour-trigger">
+          <Button
+            className="tour-btn"
+            onClick={startTour}
+          >
+            📖 功能引导
+          </Button>
+        </View>
+      )} */}
     </View>
   )
 }

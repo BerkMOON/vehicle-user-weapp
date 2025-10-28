@@ -1,41 +1,20 @@
 import { View, Text, Canvas } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
-import { ArrowSize8, Receipt, Voucher, QrCode, User, ArrowExchange, Video } from '@nutui/icons-react-taro'
+import { ArrowSize8, Receipt, User, ArrowExchange, Video } from '@nutui/icons-react-taro'
 import { Avatar, Popup, Button } from '@nutui/nutui-react-taro'
 import { useState } from 'react'
 import { useUserStore } from '@/store/user'
-import drawQrcode from 'weapp-qrcode'
 import { useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'  // 添加这行导入
 import { UserAPI } from '@/request/useApi'
 import { FileType } from '@/request/useApi/typings.d'
 
 function Mine() {
-  const { userInfo: { openId, phone } } = useUserStore()
+  const { userInfo: { phone } } = useUserStore()
   const { handleGetPhoneNumber } = useAuth()  // 添加这行
   const [showQRCode, setShowQRCode] = useState(false)
   const componentRef = useRef()
-
-  const handleGenerateQRCode = () => {
-    setShowQRCode(true)
-    setTimeout(() => {
-      try {
-        drawQrcode({
-          canvasId: 'myQrcode',
-          text: openId,
-          width: 200,
-          height: 200,
-          foreground: '#000000',
-          background: '#ffffff',
-          padding: 10,
-          _this: componentRef.current
-        })
-      } catch (error) {
-        console.error('生成二维码失败', error)
-      }
-    }, 100)
-  }
 
   const getPhoneNumber = async (e) => {
     await handleGetPhoneNumber(e.detail.code)
