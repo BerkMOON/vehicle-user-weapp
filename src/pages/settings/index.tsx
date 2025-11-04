@@ -42,7 +42,7 @@ function Settings() {
   // 提示关闭静音
   const showMuteTip = async () => {
     if (hasShownMuteTip) return
-    
+
     try {
       const res = await Taro.showModal({
         title: '提示',
@@ -51,7 +51,7 @@ function Settings() {
         cancelText: '稍后',
         confirmColor: '#2193b0'
       })
-      
+
       if (res.confirm) {
         // 用户点击确认，关闭静音
         handleRequest({
@@ -61,7 +61,7 @@ function Settings() {
           onSuccess: () => setIsMuted(false)
         })
       }
-      
+
       setHasShownMuteTip(true)
     } catch (error) {
       console.error('显示静音提示失败:', error)
@@ -80,7 +80,7 @@ function Settings() {
           setIsRecording(recordMatch[1] === 'Recording')
           const newIsMuted = audioMatch[1] !== 'ON'
           setIsMuted(newIsMuted)
-          
+
           // 如果检测到静音状态，显示提示
           if (newIsMuted && !hasShownMuteTip) {
             // 延迟显示，确保状态已更新
@@ -154,7 +154,7 @@ function Settings() {
         content: '开启静音录像会影响交警的责任区分和判断，可能导致事故责任认定困难。是否继续？',
         confirmText: '继续',
         cancelText: '取消',
-        confirmColor: '#ff4d4f'
+        cancelColor: '#ff4d4f'
       })
 
       if (!firstConfirm.confirm) {
@@ -165,10 +165,10 @@ function Settings() {
       // 第二次警告：影响事故救援
       const secondConfirm = await Taro.showModal({
         title: '再次确认',
-        content: '开启静音录像还会影响事故救援，无法通过声音判断事故严重程度。确定要开启静音吗？',
+        content: '开启静音录像还会影响事故救援，无法通过事故声音判断事故严重程度。确定要开启静音吗？',
         confirmText: '确定开启',
         cancelText: '取消',
-        confirmColor: '#ff4d4f'
+        cancelColor: '#ff4d4f'
       })
 
       if (!secondConfirm.confirm) {
