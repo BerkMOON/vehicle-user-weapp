@@ -12,7 +12,7 @@ import BublePop from '@/components/BublePop'
 
 function Settings() {
   const [isRecording, setIsRecording] = useState(false)
-  // const [isMuted, setIsMuted] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [isFormatting, setIsFormatting] = useState(false)
   const [volume, setVolume] = useState(5)
@@ -21,6 +21,7 @@ function Settings() {
   const [parkingMonitor, setParkingMonitor] = useState('DISABLE')
   const [parkingCapture, setParkingCapture] = useState('DISABLE')
   const [version, setVersion] = useState('')
+  const [hasShownMuteTip, setHasShownMuteTip] = useState(false)
 
   // 获取存储信息
   const fetchStorageInfo = () => {
@@ -38,6 +39,35 @@ function Settings() {
     })
   }
 
+  // 提示关闭静音
+  const showMuteTip = async () => {
+    if (hasShownMuteTip) return
+    
+    try {
+      const res = await Taro.showModal({
+        title: '提示',
+        content: '检测到记录仪视频是静音，会影响交警的责任区分和判断，可能导致事故责任认定困难，是否要关闭静音能力？',
+        confirmText: '关闭静音',
+        cancelText: '稍后',
+        confirmColor: '#2193b0'
+      })
+      
+      if (res.confirm) {
+        // 用户点击确认，关闭静音
+        handleRequest({
+          url: SettingAPI.setMute(false),
+          successMsg: '已关闭静音',
+          errorMsg: '关闭静音失败',
+          onSuccess: () => setIsMuted(false)
+        })
+      }
+      
+      setHasShownMuteTip(true)
+    } catch (error) {
+      console.error('显示静音提示失败:', error)
+    }
+  }
+
   // 获取相机状态
   const fetchCameraInfo = () => {
     handleRequest({
@@ -45,10 +75,19 @@ function Settings() {
       errorMsg: '获取相机信息失败',
       onSuccess: (data) => {
         const recordMatch = data.match(/record=(\w+)/)
-        // const audioMatch = data.match(/MovieAudio=(\w+)/)
+        const audioMatch = data.match(/MovieAudio=(\w+)/)
         if (recordMatch) {
           setIsRecording(recordMatch[1] === 'Recording')
-          // setIsMuted(audioMatch[1] !== 'ON')
+          const newIsMuted = audioMatch[1] !== 'ON'
+          setIsMuted(newIsMuted)
+          
+          // 如果检测到静音状态，显示提示
+          if (newIsMuted && !hasShownMuteTip) {
+            // 延迟显示，确保状态已更新
+            setTimeout(() => {
+              showMuteTip()
+            }, 500)
+          }
         }
       }
     })
@@ -95,14 +134,59 @@ function Settings() {
   }
 
   // 切换静音状态
-  // const handleMuteToggle = (value: boolean) => {
-  //   handleRequest({
-  //     url: SettingAPI.setMute(value),
-  //     successMsg: value ? '已开启静音' : '已关闭静音',
-  //     errorMsg: '切换静音状态失败',
-  //     onSuccess: () => setIsMuted(value)
-  //   })
-  // }
+  const handleMuteToggle = async (value: boolean) => {
+    // 如果要关闭静音，直接执行
+    if (!value) {
+      handleRequest({
+        url: SettingAPI.setMute(false),
+        successMsg: '已关闭静音',
+        errorMsg: '切换静音状态失败',
+        onSuccess: () => setIsMuted(false)
+      })
+      return
+    }
+
+    // 如果要打开静音，需要两次确认
+    try {
+      // 第一次警告：影响交警责任区分和判断
+      const firstConfirm = await Taro.showModal({
+        title: '重要提示',
+        content: '开启静音录像会影响交警的责任区分和判断，可能导致事故责任认定困难。是否继续？',
+        confirmText: '继续',
+        cancelText: '取消',
+        confirmColor: '#ff4d4f'
+      })
+
+      if (!firstConfirm.confirm) {
+        // 用户取消，不执行任何操作
+        return
+      }
+
+      // 第二次警告：影响事故救援
+      const secondConfirm = await Taro.showModal({
+        title: '再次确认',
+        content: '开启静音录像还会影响事故救援，无法通过声音判断事故严重程度。确定要开启静音吗？',
+        confirmText: '确定开启',
+        cancelText: '取消',
+        confirmColor: '#ff4d4f'
+      })
+
+      if (!secondConfirm.confirm) {
+        // 用户取消，不执行任何操作
+        return
+      }
+
+      // 两次都确认，执行开启静音
+      handleRequest({
+        url: SettingAPI.setMute(true),
+        successMsg: '已开启静音',
+        errorMsg: '开启静音失败',
+        onSuccess: () => setIsMuted(true)
+      })
+    } catch (error) {
+      console.error('显示确认弹窗失败:', error)
+    }
+  }
 
   // 格式化存储
   const handleFormat = async () => {
@@ -251,6 +335,13 @@ function Settings() {
           <Switch
             checked={parkingMonitor === 'ENABLE'}
             onChange={(e) => handleParkingMonitorChange(e.detail.value)}
+          />
+        </View>
+        <View className="setting-item">
+          <Text>静音录像</Text>
+          <Switch
+            checked={isMuted}
+            onChange={(e) => handleMuteToggle(e.detail.value)}
           />
         </View>
       </View>

@@ -56,7 +56,7 @@ export const getRequest = async <T>(config: any): Promise<T | null>  => {
     return res.data as T
   } catch (error) {
     Taro.showToast({
-      title: '接口错误',
+      title: `接口错误: ${error.message}`,
       icon: 'none'
     })
     return null
@@ -78,7 +78,7 @@ export const postRequest = async <T>(config: any): Promise<T | null> => {
     return res.data as T
   } catch (error) {
     Taro.showToast({
-      title: '接口错误',
+      title: `接口错误: ${error.message}`,
       icon: 'none'
     })
     return null
