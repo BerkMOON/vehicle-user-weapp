@@ -20,10 +20,10 @@ export const SettingAPI = {
   }),
 
   // 设置录像状态
-  setRecording: (value: boolean) => getRequestUrl({
+  setRecording: () => getRequestUrl({
     action: 'set',
     property: 'Video',
-    value: value ? 'record' : 'stop'
+    value: 'record'
   }),
 
   // 设置静音状态

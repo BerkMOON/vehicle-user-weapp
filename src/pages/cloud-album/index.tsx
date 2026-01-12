@@ -138,7 +138,9 @@ export default function CloudAlbum() {
         try {
           // 从完整URL中提取路径部分
           const url = new URL(item.url)
-          const pathMatch = url.pathname.match(/\/test\/cloud\/.*$/)
+          // 根据环境判断使用 test 或 prod
+          const envPath = process.env.NODE_ENV === 'production' ? 'prod' : 'test'
+          const pathMatch = url.pathname.match(new RegExp(`/${envPath}/cloud/.*$`))
           const path = pathMatch ? pathMatch[0].substring(1) : '' // 移除开头的斜杠
 
           await CloudAPI.delCloudObject({

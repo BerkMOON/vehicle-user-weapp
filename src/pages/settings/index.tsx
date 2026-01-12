@@ -1,23 +1,23 @@
 import { View, Text, Switch, Slider } from '@tarojs/components'
 import { useState, useEffect } from 'react'
 import { Disk, Photograph, Power, Tips, Voice } from '@nutui/icons-react-taro'
-import { Picker } from '@nutui/nutui-react-taro'
+// import { Picker } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
 import './index.scss'
-import { StorageInfo, RECORDING_DURATIONS } from './constants'
+import { StorageInfo } from './constants'
 import { parseStorageInfo } from '@/utils/utils'
 import { handleRequest } from '@/request'
 import { SettingAPI } from '@/request/settingApi'
 import BublePop from '@/components/BublePop'
 
 function Settings() {
-  const [isRecording, setIsRecording] = useState(false)
+  // const [isRecording, setIsRecording] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
   const [isFormatting, setIsFormatting] = useState(false)
   const [volume, setVolume] = useState(5)
-  const [recordingDuration, setRecordingDuration] = useState('1MIN')
-  const [durationPickerVisible, setDurationPickerVisible] = useState(false)
+  // const [recordingDuration, setRecordingDuration] = useState('1MIN')
+  // const [durationPickerVisible, setDurationPickerVisible] = useState(false)
   const [parkingMonitor, setParkingMonitor] = useState('DISABLE')
   const [parkingCapture, setParkingCapture] = useState('DISABLE')
   const [version, setVersion] = useState('')
@@ -74,21 +74,21 @@ function Settings() {
       url: SettingAPI.getCameraInfo(),
       errorMsg: '获取相机信息失败',
       onSuccess: (data) => {
-        const recordMatch = data.match(/record=(\w+)/)
+        // const recordMatch = data.match(/record=(\w+)/)
         const audioMatch = data.match(/MovieAudio=(\w+)/)
-        if (recordMatch) {
-          setIsRecording(recordMatch[1] === 'Recording')
-          const newIsMuted = audioMatch[1] !== 'ON'
-          setIsMuted(newIsMuted)
+        // if (recordMatch) {
+        // setIsRecording(recordMatch[1] === 'Recording')
+        const newIsMuted = audioMatch[1] !== 'ON'
+        setIsMuted(newIsMuted)
 
-          // 如果检测到静音状态，显示提示
-          if (newIsMuted && !hasShownMuteTip) {
-            // 延迟显示，确保状态已更新
-            setTimeout(() => {
-              showMuteTip()
-            }, 500)
-          }
+        // 如果检测到静音状态，显示提示
+        if (newIsMuted && !hasShownMuteTip) {
+          // 延迟显示，确保状态已更新
+          setTimeout(() => {
+            showMuteTip()
+          }, 500)
         }
+        // }
       }
     })
   }
@@ -100,7 +100,7 @@ function Settings() {
       errorMsg: '获取设备信息失败',
       onSuccess: (data) => {
         const volumeMatch = data.match(/VolAdj=(\d+)/)
-        const loopingVideoMatch = data.match(/LoopingVideo=(\w+)/)
+        // const loopingVideoMatch = data.match(/LoopingVideo=(\w+)/)
         const parkingMonitorMatch = data.match(/ParkingMonitor=(\w+)/)
         const versionMatch = data.match(/FWversion=(\w+)/)
         const isParkingCaptureMatch = data.match(/ParkCapture=(\w+)/)
@@ -110,9 +110,9 @@ function Settings() {
         if (parkingMonitorMatch) {
           setParkingMonitor(parkingMonitorMatch[1])
         }
-        if (loopingVideoMatch) {
-          setRecordingDuration(loopingVideoMatch[1])
-        }
+        // if (loopingVideoMatch) {
+        //   setRecordingDuration(loopingVideoMatch[1])
+        // }
         if (volumeMatch) {
           setVolume(parseInt(volumeMatch[1], 10))
         }
@@ -124,14 +124,14 @@ function Settings() {
   }
 
   // 切换录像状态
-  const handleRecordingToggle = (value: boolean) => {
-    handleRequest({
-      url: SettingAPI.setRecording(value),
-      successMsg: value ? '已开启录像' : '已关闭录像',
-      errorMsg: '切换录像状态失败',
-      onSuccess: () => setIsRecording(value)
-    })
-  }
+  // const handleRecordingToggle = (value: boolean) => {
+  //   handleRequest({
+  //     url: SettingAPI.setRecording(),
+  //     successMsg: value ? '已开启录像' : '已关闭录像',
+  //     errorMsg: '切换录像状态失败',
+  //     onSuccess: () => setIsRecording(value)
+  //   })
+  // }
 
   // 切换静音状态
   const handleMuteToggle = async (value: boolean) => {
@@ -251,14 +251,14 @@ function Settings() {
   }
 
   // 设置录像时长
-  const handleDurationChange = (values: string[]) => {
-    handleRequest({
-      url: SettingAPI.setRecordingDuration(values[0]),
-      successMsg: '设置成功',
-      errorMsg: '设置录像时长失败',
-      onSuccess: () => setRecordingDuration(values[0])
-    })
-  }
+  // const handleDurationChange = (values: string[]) => {
+  //   handleRequest({
+  //     url: SettingAPI.setRecordingDuration(values[0]),
+  //     successMsg: '设置成功',
+  //     errorMsg: '设置录像时长失败',
+  //     onSuccess: () => setRecordingDuration(values[0])
+  //   })
+  // }
 
   // 设置扬声器音量
   const handleVolumeChange = (value: number) => {
@@ -346,7 +346,7 @@ function Settings() {
         </View>
       </View>
 
-      <View className="section">
+      {/* <View className="section">
         <View className="section-header">
           <Power />
           <Text className="title">录像设置</Text>
@@ -364,7 +364,7 @@ function Settings() {
             {RECORDING_DURATIONS.find(duration => duration.value === recordingDuration)?.text}
           </View>
         </View>
-      </View>
+      </View> */}
 
       <View className="section">
         <View className="section-header">
@@ -442,14 +442,14 @@ function Settings() {
         </View>
       </View>
 
-      <Picker
+      {/* <Picker
         title="请选择录像时长"
         visible={durationPickerVisible}
         value={[recordingDuration]}
         options={RECORDING_DURATIONS}
         onConfirm={(_, values) => handleDurationChange(values as string[])}
         onClose={() => setDurationPickerVisible(false)}
-      />
+      /> */}
     </View>
   )
 }

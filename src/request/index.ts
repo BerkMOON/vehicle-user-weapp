@@ -20,6 +20,7 @@ export const handleRequest = async (config: RequestConfig) => {
     })
 
     if (res.statusCode === 200) {
+      console.log(res.data)
       onSuccess?.(res.data)
       if (successMsg) {
         Taro.showToast({

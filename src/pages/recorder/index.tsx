@@ -110,8 +110,10 @@ function Recorder() {
           ...prev,
           [activeTab]: from + PAGE_SIZE
         }))
+        Taro.hideLoading()
       }
     } catch (error) {
+      Taro.hideLoading()
       console.error('获取文件列表错误:', error)
       Taro.showToast({
         title: '网络错误，请重试',
@@ -195,6 +197,9 @@ function Recorder() {
 
   // 处理刷新
   const handleRefresh = () => {
+    Taro.showLoading({
+      title: '刷新中'
+    })
     setPageFrom(prev => ({
       ...prev,
       [activeTab]: 0
