@@ -3,7 +3,8 @@ module.exports = {
     NODE_ENV: '"production"'
   },
   defineConstants: {
-    TARO_APP_API_BASE_URL: '"https://eda-consumer.ai-kaka.com"'
+    TARO_APP_API_BASE_URL: '"https://eda-consumer.ai-kaka.com"',
+    TARO_APP_WEBVIEW_PLAYER_URL: '"https://eda-web-view.ai-kaka.com"'
   },
   mini: {},
   h5: {

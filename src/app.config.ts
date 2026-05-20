@@ -12,6 +12,7 @@ export default defineAppConfig({
     'pages/terms/index',
     'pages/parking-detail/index',
     'pages/video-player/index',
+    'pages/video-web-player/index',
     'pages/emergency/index',
   ],
   window: {

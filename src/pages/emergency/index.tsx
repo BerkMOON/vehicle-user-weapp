@@ -140,26 +140,28 @@ export default function EmergencyVideo() {
 
   return (
     <View className='cloud-album'>
-      <View className='filters'>
-        <Picker
-          mode='selector'
-          range={devices.map(device => `设备：${device.sn}`)}
-          value={devices.findIndex(device => device.sn === selectedDevice)}
-          onChange={(e) => {
-            const device = devices[e.detail.value]
-            setSelectedDevice(device.sn)
-          }}
-        >
-          <View className='picker-item'>
-            <View className='device-sn'>
-              {selectedDevice ? `设备：${selectedDevice}` : '请选择设备'}
+      {devices.length > 1 && (
+        <View className='filters'>
+          <Picker
+            mode='selector'
+            range={devices.map(device => `设备：${device.sn}`)}
+            value={devices.findIndex(device => device.sn === selectedDevice)}
+            onChange={(e) => {
+              const device = devices[e.detail.value]
+              setSelectedDevice(device.sn)
+            }}
+          >
+            <View className='picker-item'>
+              <View className='device-sn'>
+                {selectedDevice ? `设备：${selectedDevice}` : '请选择设备'}
+              </View>
             </View>
-          </View>
-        </Picker>
-      </View>
+          </Picker>
+        </View>
+      )}
 
       <ScrollView
-        className='scroll-info'
+        className={devices.length <= 1 ? 'scroll-info scroll-info--no-filter' : 'scroll-info'}
         scrollY
         onScrollToLower={onScrollToLower}
       >

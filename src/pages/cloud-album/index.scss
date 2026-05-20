@@ -1,5 +1,16 @@
 .cloud-album {
   background: #f7f8fa;
+
+  &--initial-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .initial-loading-wrap {
+    padding: 48px;
+  }
 }
 
 .filters {
@@ -11,6 +22,14 @@
   display: flex;
   background: #fff;
   border-bottom: 1px solid #eee;
+
+  &.filters--single-device .picker-item {
+    flex: 1;
+
+    &:first-child {
+      flex: 1;
+    }
+  }
 
   .picker-item {
     flex: 1;

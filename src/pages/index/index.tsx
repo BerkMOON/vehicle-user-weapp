@@ -1,6 +1,7 @@
 import { Button, View, Image } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
+import { CLOUD_ALBUM_PENDING_SN_STORAGE_KEY } from '@/constants/constants'
 import { useEffect, useState, useRef } from 'react'  // 添加 useRef
 import { useUserStore } from '@/store/user'
 import { DeviceAPI } from '@/request/deviceApi'
@@ -8,7 +9,7 @@ import { DeviceInfo } from '@/request/deviceApi/typings.d'
 import { Computer, PlayStart } from '@nutui/icons-react-taro'
 import { SettingAPI } from '@/request/settingApi'
 import { handleRequest } from '@/request'
-import { Dialog, Loading, Tour } from '@nutui/nutui-react-taro'
+import { Dialog, Loading } from '@nutui/nutui-react-taro'
 import NotLogin from '@/components/NotLogin'
 import NotBind from '@/components/NotBind'
 import { useAuth } from '@/hooks/useAuth'
@@ -44,7 +45,7 @@ function Index() {
   //     arrowOffset?: number;
   //     location?: string
   //   }> = []
-    
+
   //   // 如果有设备，添加查看设备步骤
   //   if (deviceList.length > 0) {
   //     steps.push({
@@ -54,7 +55,7 @@ function Index() {
   //       arrowOffset: -260,
   //     })
   //   }
-    
+
   //   // 添加视频教程步骤
   //   steps.push({
   //     content: '点击这里可以学习如何连接设备的详细视频教程',
@@ -63,7 +64,7 @@ function Index() {
   //     arrowOffset: 120,
   //     location: 'top-start',
   //   })
-    
+
   //   // 如果有设备，添加添加设备步骤
   //   if (deviceList.length > 0) {
   //     steps.push({
@@ -72,7 +73,7 @@ function Index() {
   //       popoverOffset: [0, 8],
   //     })
   //   }
-    
+
   //   return steps
   // }
 
@@ -248,19 +249,6 @@ function Index() {
     }
   }, [isLogin, loginStatus])  // 添加 loginStatus 作为依赖
 
-  // // 检查是否需要显示引导
-  // useEffect(() => {
-  //   if (isLogin && loginStatus === 'success') {
-  //     // const hasCompletedTour = Taro.getStorageSync('hasCompletedTour')
-  //     // if (!hasCompletedTour) {
-  //       // 延迟显示引导，确保页面已完全加载
-  //       setTimeout(() => {
-  //         setShowTour(true)
-  //       }, 1000)
-  //     // }
-  //   }
-  // }, [isLogin, loginStatus])
-
   const handleUnbind = async (sn: string) => {
     try {
       const res = await DeviceAPI.unbind(sn)
@@ -284,6 +272,45 @@ function Index() {
     }
   }
 
+  const isCloudDevice = (d: DeviceInfo) => d.is_cloud_ver === true
+
+  const isWifiConnectedToDevice = (d: DeviceInfo) =>
+    connectDeivce?.sn === d.sn && !!connectDeivce.version
+
+  const canOperateWithoutWifi = (d: DeviceInfo) =>
+    isCloudDevice(d) || isWifiConnectedToDevice(d)
+
+  const openDeviceView = (d: DeviceInfo) => {
+    if (isCloudDevice(d)) {
+      if (isWifiConnectedToDevice(d)) {
+        void Taro.navigateTo({ url: '/pages/recorder/index' })
+        return
+      }
+      try {
+        Taro.setStorageSync(CLOUD_ALBUM_PENDING_SN_STORAGE_KEY, d.sn)
+      } catch {
+        /* ignore */
+      }
+      void Taro.switchTab({ url: '/pages/cloud-album/index' })
+      return
+    }
+    void Taro.navigateTo({ url: '/pages/recorder/index' })
+  }
+
+  const openDeviceSettings = (d: DeviceInfo) => {
+    if (isCloudDevice(d)) {
+      if (isWifiConnectedToDevice(d)) {
+        void Taro.navigateTo({ url: '/pages/settings/index' })
+        return
+      }
+      void Taro.navigateTo({
+        url: `/pages/settings/index?cloud=1&device_id=${encodeURIComponent(d.device_id)}`
+      })
+      return
+    }
+    void Taro.navigateTo({ url: '/pages/settings/index' })
+  }
+
   const previewVideo = async () => {
     Taro.showLoading({
       title: '加载中',
@@ -291,7 +318,7 @@ function Index() {
 
     const system = deviceInfo.brand === 'HUAWEI' ? 'huawei' : deviceInfo.platform === 'android' ? 'android'
       : 'ios';
-    
+
     try {
       const res = await UserAPI.getInstruction({
         needSynopsisPdf: false,
@@ -364,6 +391,13 @@ function Index() {
                 <View className="device-info">
                   <View className="device-id">设备号：{device.sn}</View>
                   <View className="vin">车架号：{device.vin}</View>
+                  {isCloudDevice(device) && (
+                    <>
+                      <View className="vin">
+                        云端设备：不连 WiFi 也可通过网络查看云相册、云端设置
+                      </View>
+                    </>
+                  )}
                   {
                     connectDeivce?.sn === device.sn && connectDeivce.version && <View className="vin">
                       <View> 固件版本号：</View>
@@ -384,15 +418,15 @@ function Index() {
                   <Button
                     id="view-device-btn"
                     className="action-btn"
-                    onClick={() => Taro.navigateTo({ url: '/pages/recorder/index' })}
-                    disabled={!(connectDeivce?.sn === device.sn && connectDeivce.version)}  // 添加设备连接状态判断
+                    onClick={() => openDeviceView(device)}
+                    disabled={!canOperateWithoutWifi(device)}
                   >
                     查看
                   </Button>
                   <Button
                     className="action-btn"
-                    onClick={() => Taro.navigateTo({ url: '/pages/settings/index' })}
-                    disabled={!(connectDeivce?.sn === device.sn && connectDeivce.version)}   // 添加设备连接状态判断
+                    onClick={() => openDeviceSettings(device)}
+                    disabled={!canOperateWithoutWifi(device)}
                   >
                     设置
                   </Button>

@@ -1,8 +1,9 @@
 import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
-import { EmergencyVideoResponse, EmergencyVideosParmas, PhotoInfo } from "./typings"
+import { CycleVideoListParmas, CycleVideoListResponse, DeviceConfigResponse, EmergencyVideoResponse, EmergencyVideosParmas, PhotoInfo, SendDeviceCommandParams } from "./typings"
 
 const prefix = TARO_APP_API_BASE_URL + '/api/consumer/wx'
+const deviceConsumerPrefix = TARO_APP_API_BASE_URL + '/api/consumer/device'
 
 export const CloudAPI = {
 
@@ -75,4 +76,39 @@ export const CloudAPI = {
       device_id
     }
   }),
+
+  /**
+   * 获取循环视频列表
+  GET /api/consumer/wx/getCycleVideoList
+  接口ID：455539886
+  接口地址：https://app.apifox.com/link/project/5846841/apis/api-455539886
+  */
+  getCycleVideoList: (params: CycleVideoListParmas) => getRequest<ResponseInfoType<CycleVideoListResponse>>({
+    url: `${prefix}/getCycleVideoList`,
+    params
+  }),
+
+  /**
+   * 设备指令下发
+   * POST /api/consumer/device/command
+   * 接口ID：458269286
+   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-458269286
+   */
+  sendDeviceCommand: (params: SendDeviceCommandParams) =>
+    postRequest<ResponseInfoType<null>>({
+      url: `${deviceConsumerPrefix}/command`,
+      params
+    }),
+
+  /**
+   * 查询设备配置信息
+   * GET /api/consumer/device/config
+   * 接口ID：458271484
+   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-458271484
+  */
+  getDeviceConfig: (params: { device_id: string }) =>
+    getRequest<ResponseInfoType<DeviceConfigResponse>>({
+      url: `${deviceConsumerPrefix}/config`,
+      params
+    }),
 } 

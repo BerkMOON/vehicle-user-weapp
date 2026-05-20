@@ -11,6 +11,9 @@ export const COUPON_TYPES = [
 
 export const SuccessCode = 200
 
+/** 首页云端「查看」走 switchTab 无法带 query，用此 key 写入待选设备 sn，云相册读一次即删 */
+export const CLOUD_ALBUM_PENDING_SN_STORAGE_KEY = 'cloud_album_pending_sn'
+
 export const Car_Brand_Options = [
   { value: '奥迪', text: '奥迪' },
   { value: '红旗', text: '红旗' },

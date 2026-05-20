@@ -1,0 +1,16 @@
+.video-web-player {
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+
+  &--empty {
+    padding: 24px;
+    background: #f7f8fa;
+  }
+
+  &__hint {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+  }
+}
