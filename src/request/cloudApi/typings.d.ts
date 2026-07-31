@@ -6,6 +6,7 @@ export interface Photos {
   name: string;
   created_time: string
   size: number;
+  first_frame_url?: string;
 }
 
 export interface PhotoInfo {
@@ -27,6 +28,7 @@ export interface EmergencyVideoInfo {
   };
   trigger_time?: string;
   video_url?: string;
+  first_frame_url?: string;
 }
 
 export interface EmergencyVideoResponse {

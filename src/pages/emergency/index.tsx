@@ -186,7 +186,7 @@ export default function EmergencyVideo() {
                       <View className="video-thumbnail">
                         <PlayStart size={30} style={{ zIndex: 1 }} />
                         <Image
-                          src={DefaultPng}
+                          src={file.first_frame_url || DefaultPng}
                           className="thumbnail"
                           mode="aspectFill"
                         />

@@ -10,48 +10,59 @@ function formatToday() {
   return dayjs().format('YYYY-MM-DD')
 }
 
-/** 统一为接口所需 YYYY-MM-DD（兼容历史脏数据） */
-export function normalizeToYMD(raw: unknown): string {
-  if (raw == null || raw === '') return formatToday()
-  const s = String(raw).trim()
-  const matched = s.match(/(\d{4}-\d{2}-\d{2})/)
-  if (matched) return matched[1]
-  const d = dayjs(s)
-  return d.isValid() ? d.format('YYYY-MM-DD') : formatToday()
+function formatYesterday() {
+  return dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 }
 
-function clampDateYMD(ymd: string, start: string, end: string) {
-  const t = dayjs(ymd)
-  const a = dayjs(start)
-  const b = dayjs(end)
-  if (!t.isValid()) return end
-  if (t.isBefore(a)) return start
-  if (t.isAfter(b)) return end
-  return ymd
+/** 行车视频仅允许今天、昨天 */
+export function getCycleVideoDateOptions() {
+  const today = formatToday()
+  const yesterday = formatYesterday()
+  return [
+    { label: `今天 (${today})`, value: today },
+    { label: `昨天 (${yesterday})`, value: yesterday }
+  ]
+}
+
+/** 统一为接口所需 YYYY-MM-DD，且限制在今天/昨天 */
+export function normalizeToYMD(raw: unknown): string {
+  const today = formatToday()
+  const yesterday = formatYesterday()
+  if (raw == null || raw === '') {
+    return today
+  }
+  const s = String(raw).trim()
+  const matched = s.match(/(\d{4}-\d{2}-\d{2})/)
+  const ymd = matched ? matched[1] : (dayjs(s).isValid() ? dayjs(s).format('YYYY-MM-DD') : today)
+  if (ymd === today || ymd === yesterday) {
+    return ymd
+  }
+  return today
 }
 
 /**
- * 行车视频选日期：使用小程序原生日期 Picker（稳定、date_str 恒为 YYYY-MM-DD）
- * 不用 NutUI Calendar，避免部分基础库/机型白屏
+ * 行车视频选日期：仅可选今天、昨天（近 24 小时录像）
  */
 export function CycleDateCalendarPicker({ value, onChange }: Props) {
-  const endDate = formatToday()
-  const startDate = dayjs().subtract(365, 'day').format('YYYY-MM-DD')
-  const normalized = value ? normalizeToYMD(value) : endDate
-  const pickerValue = clampDateYMD(normalized, startDate, endDate)
+  const options = getCycleVideoDateOptions()
+  const normalized = normalizeToYMD(value)
+  const pickerIndex = Math.max(
+    0,
+    options.findIndex((o) => o.value === normalized)
+  )
 
   return (
     <Picker
-      mode='date'
-      value={pickerValue}
-      start={startDate}
-      end={endDate}
-      onChange={e => {
-        onChange(normalizeToYMD(e.detail.value))
+      mode='selector'
+      range={options.map((o) => o.label)}
+      value={pickerIndex}
+      onChange={(e) => {
+        const idx = Number(e.detail.value)
+        onChange(options[idx]?.value ?? formatToday())
       }}
     >
       <View className='picker-item'>
-        <Text>{value ? normalizeToYMD(value) : '请选择日期'}</Text>
+        <Text>{options[pickerIndex]?.label ?? '请选择日期'}</Text>
       </View>
     </Picker>
   )

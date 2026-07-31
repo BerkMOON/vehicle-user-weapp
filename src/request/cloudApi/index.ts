@@ -2,16 +2,14 @@ import { ResponseInfoType } from "types/common"
 import { getRequest, postRequest } from ".."
 import { CycleVideoListParmas, CycleVideoListResponse, DeviceConfigResponse, EmergencyVideoResponse, EmergencyVideosParmas, PhotoInfo, SendDeviceCommandParams } from "./typings"
 
-const prefix = TARO_APP_API_BASE_URL + '/api/consumer/wx'
+const prefix = TARO_APP_API_BASE_URL + '/api/consumer/cloud'
 const deviceConsumerPrefix = TARO_APP_API_BASE_URL + '/api/consumer/device'
 
 export const CloudAPI = {
 
   /**
-   *  获取用户信息
-   *  GET /api/consumer/wx/getSelfInfo
-   *  接口ID：259941820
-   *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259941820
+   *  获取云相册照片
+   *  GET /api/consumer/cloud/getCloudPhotos
    */
   getCloudPhoto: ({ nextToken, limit, deviceId, type, date }) => getRequest<ResponseInfoType<PhotoInfo>>({
     url: `${prefix}/getCloudPhotos`,
@@ -25,11 +23,9 @@ export const CloudAPI = {
   }),
 
   /**
- *  获取用户信息
- *  GET /api/consumer/wx/getSelfInfo
- *  接口ID：259941820
- *  接口地址：https://app.apifox.com/link/project/5846841/apis/api-259941820
- */
+   *  获取云相册文件夹
+   *  GET /api/consumer/cloud/getCloudFolders
+   */
   getCloudFolders: ({ deviceId, type }) => getRequest<ResponseInfoType<string[]>>({
     url: `${prefix}/getCloudFolders`,
     params: {
@@ -40,9 +36,7 @@ export const CloudAPI = {
 
   /**
    * 紧急视频列表
-   * GET /api/consumer/wx/getEmergencyVideos
-   * 接口ID：318308620
-   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-318308620
+   * GET /api/consumer/cloud/getEmergencyVideos
    */
   getEmergencyVideos: (params: EmergencyVideosParmas) => getRequest<ResponseInfoType<EmergencyVideoResponse>>({
     url: `${prefix}/getEmergencyVideos`,
@@ -51,9 +45,7 @@ export const CloudAPI = {
 
   /**
    * 紧急视频删除
-   * POST /api/consumer/wx/delEmergencyVideo
-   * 接口ID：318309411
-   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-318309411
+   * POST /api/consumer/cloud/delEmergencyVideo
    */
   delEmergencyVideo: ({ device_id, id }) => postRequest<ResponseInfoType<null>>({
     url: `${prefix}/delEmergencyVideo`,
@@ -64,10 +56,8 @@ export const CloudAPI = {
   }),
 
   /**
-  oss文件删除
-  POST /api/consumer/wx/delCloudObject
-  接口ID：362456769
-  接口地址：https://app.apifox.com/link/project/5846841/apis/api-362456769  
+   * oss文件删除
+   * POST /api/consumer/cloud/delCloudObject
    */
   delCloudObject: ({ device_id, path }) => postRequest<ResponseInfoType<null>>({
     url: `${prefix}/delCloudObject`,
@@ -79,10 +69,8 @@ export const CloudAPI = {
 
   /**
    * 获取循环视频列表
-  GET /api/consumer/wx/getCycleVideoList
-  接口ID：455539886
-  接口地址：https://app.apifox.com/link/project/5846841/apis/api-455539886
-  */
+   * GET /api/consumer/cloud/getCycleVideoList
+   */
   getCycleVideoList: (params: CycleVideoListParmas) => getRequest<ResponseInfoType<CycleVideoListResponse>>({
     url: `${prefix}/getCycleVideoList`,
     params
@@ -91,8 +79,6 @@ export const CloudAPI = {
   /**
    * 设备指令下发
    * POST /api/consumer/device/command
-   * 接口ID：458269286
-   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-458269286
    */
   sendDeviceCommand: (params: SendDeviceCommandParams) =>
     postRequest<ResponseInfoType<null>>({
@@ -103,12 +89,10 @@ export const CloudAPI = {
   /**
    * 查询设备配置信息
    * GET /api/consumer/device/config
-   * 接口ID：458271484
-   * 接口地址：https://app.apifox.com/link/project/5846841/apis/api-458271484
-  */
+   */
   getDeviceConfig: (params: { device_id: string }) =>
     getRequest<ResponseInfoType<DeviceConfigResponse>>({
       url: `${deviceConsumerPrefix}/config`,
       params
     }),
-} 
+}

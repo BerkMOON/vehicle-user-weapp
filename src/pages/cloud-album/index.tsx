@@ -24,7 +24,7 @@ function formatYMD(d: Date) {
   return `${y}-${m}-${day}`
 }
 
-type MediaItem = Photos & { cover_url?: string; video_path?: string }
+type MediaItem = Photos & { first_frame_url?: string; video_path?: string }
 
 const ALL_TYPE_OPTIONS = [
   { text: '行车视频', value: 'cycle_video' },
@@ -43,7 +43,7 @@ function mapCycleItemToMedia(item: ItemList, index: number): MediaItem {
     video_path: item.video_path,
     created_time: item.last_modified || '',
     size: item.size || 0,
-    cover_url: item.first_frame_url
+    first_frame_url: item.first_frame_url
   }
 }
 
@@ -449,7 +449,7 @@ export default function CloudAlbum() {
                       <View className="video-thumbnail">
                         <PlayStart size={30} style={{ zIndex: 1 }} />
                         <Image
-                          src={selectedType === 'cycle_video' && file.cover_url ? file.cover_url : DefaultPng}
+                          src={file.first_frame_url || DefaultPng}
                           className="thumbnail"
                           mode="aspectFill"
                         />
