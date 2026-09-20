@@ -1,8 +1,15 @@
-import { Button, View, Image } from '@tarojs/components'
+import { Button, View, Image, Text } from '@tarojs/components'
 import './index.scss'
 import Taro from '@tarojs/taro'
-import { CLOUD_ALBUM_PENDING_SN_STORAGE_KEY } from '@/constants/constants'
-import { useEffect, useState, useRef } from 'react'  // 添加 useRef
+import {
+  CLOUD_ALBUM_PENDING_SN_STORAGE_KEY,
+  CLOUD_ALBUM_PENDING_TYPE_STORAGE_KEY
+} from '@/constants/constants'
+import { useMembershipStore } from '@/store/membership'
+import {
+  resolveCloudDaysFromStatus
+} from '@/utils/membership'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useUserStore } from '@/store/user'
 import { DeviceAPI } from '@/request/deviceApi'
 import { DeviceInfo } from '@/request/deviceApi/typings.d'
@@ -16,9 +23,19 @@ import { useAuth } from '@/hooks/useAuth'
 import { ParkingCard } from './Components/Parking'
 import { UserAPI } from '@/request/useApi'
 import postImg from '@/assets/post.jpg'
+import AppPromoBanner from '@/components/AppPromoBanner'
 
 function Index() {
   const { isLogin, loginStatus } = useUserStore()
+  const membershipReady = useMembershipStore((s) => s.ready)
+  const membershipInfo = useMembershipStore((s) => s.info)
+  const membership = useMemo(() => {
+    const cloudDays = resolveCloudDaysFromStatus(membershipInfo)
+    return {
+      ready: membershipReady,
+      canViewCycleVideo: cloudDays > 0
+    }
+  }, [membershipReady, membershipInfo])
   const { handleSetDeviceInfo } = useAuth()
   const [deviceList, setDeviceList] = useState<DeviceInfo[]>([])
   const [connectDeivce, setConnectDevice] = useState<{
@@ -218,36 +235,30 @@ function Index() {
     try {
       setLoading(true)
       const res = await DeviceAPI.list()
-      if (res?.data?.device_list) {
-        setDeviceList(res.data.device_list)
-      }
-      setLoading(false)
-      handleSetDeviceInfo()
+      setDeviceList(res?.data?.device_list || [])
     } catch (error) {
       console.error('获取设备列表失败:', error)
+      setDeviceList([])
+    } finally {
       setLoading(false)
+      void handleSetDeviceInfo()
     }
-  }
-
-  const copyUrl = () => {
-    Taro.setClipboardData({
-      data: 'http://eda-mini-program.ai-kaka.com/',
-      success: () => {
-        Taro.showToast({
-          title: '网址已复制',
-          icon: 'success',
-          duration: 3000
-        })
-      }
-    })
   }
 
   useEffect(() => {
-    // 只有当登录状态为 success 时才获取设备列表
-    if (isLogin && loginStatus === 'success') {
-      fetchDeviceList()
+    if (!isLogin) {
+      setDeviceList([])
+      setLoading(false)
+      return
     }
-  }, [isLogin, loginStatus])  // 添加 loginStatus 作为依赖
+    if (loginStatus === 'error') {
+      setLoading(false)
+      return
+    }
+    if (loginStatus === 'success') {
+      void fetchDeviceList()
+    }
+  }, [isLogin, loginStatus])
 
   const handleUnbind = async (sn: string) => {
     try {
@@ -311,6 +322,22 @@ function Index() {
     void Taro.navigateTo({ url: '/pages/settings/index' })
   }
 
+  const albumEntries = [
+    { type: 'cycle_video', label: '行车视频', vip: true, bg: 'linear-gradient(145deg, #1a7f9a 0%, #46c3db 100%)', icon: '▶' },
+    { type: 'shutdown', label: '停车拍照', vip: false, bg: 'linear-gradient(145deg, #e67e22 0%, #f5b041 100%)', icon: '▣' },
+    { type: 'photos', label: '照片', vip: false, bg: 'linear-gradient(145deg, #5b4cdb 0%, #9b8cff 100%)', icon: '◫' },
+    { type: 'videos', label: '视频', vip: false, bg: 'linear-gradient(145deg, #0f9f75 0%, #48d6a8 100%)', icon: '◎' },
+  ] as const
+
+  const openAlbumType = (type: string) => {
+    try {
+      Taro.setStorageSync(CLOUD_ALBUM_PENDING_TYPE_STORAGE_KEY, type)
+    } catch {
+      /* ignore */
+    }
+    void Taro.switchTab({ url: '/pages/cloud-album/index' })
+  }
+
   const previewVideo = async () => {
     Taro.showLoading({
       title: '加载中',
@@ -354,9 +381,17 @@ function Index() {
     }
   };
 
+  const parkingDeviceIds = useMemo(
+    () => deviceList.map((d) => d.device_id),
+    [deviceList]
+  )
+
   return (
     <View className="page">
       <View className='header'></View>
+
+      <AppPromoBanner />
+
       <View className="device-section">
         <View className="section-header">
           <View className="title">
@@ -378,7 +413,7 @@ function Index() {
         ) : deviceList.length === 0 ? (
           <View className="empty-state">
             {
-              loading ? (
+              (loading || loginStatus === 'pending') ? (
                 <Loading type="spinner">加载中</Loading>
               ) :
                 <NotBind></NotBind>
@@ -453,59 +488,76 @@ function Index() {
         )}
       </View>
 
-      <ParkingCard deviceIds={deviceList.map(list => list.device_id)}></ParkingCard>
-
-      <View
-        id="video-tutorial-btn"
-        className="video-card"
-        onClick={previewVideo}
-      >
-        <View className="video-thumbnail">
-          <Image
-            src={postImg}
-            className="thumbnail-image"
-            mode="aspectFill"
-          />
-          <View className="play-overlay">
-            <PlayStart size={40} color="#fff" />
+      <View className="album-panel">
+        <View className="section-header">
+          <View className="title">云相册</View>
+          <View
+            className="panel-link"
+            onClick={() => Taro.switchTab({ url: '/pages/cloud-album/index' })}
+          >
+            全部
           </View>
         </View>
-        <View className="video-info">
-          <View className="video-title">连接设备视频</View>
-          <View className="video-desc">快速学习如何连接设备</View>
+
+        {isLogin && membership.ready && !membership.canViewCycleVideo && (
+          <View className="album-hint" onClick={() => openAlbumType('cycle_video')}>
+            <Text>行车视频云回看为会员权益，点此了解（请到 App 开通）</Text>
+          </View>
+        )}
+
+        <View className="album-entry-grid">
+          {albumEntries.map((item) => (
+            <View
+              key={item.type}
+              className="album-entry-item"
+              onClick={() => openAlbumType(item.type)}
+            >
+              <View className="album-entry-icon" style={{ background: item.bg }}>
+                <Text className="album-entry-icon-text">{item.icon}</Text>
+                {item.vip && <Text className="album-vip">会员</Text>}
+              </View>
+              <Text className="album-entry-text">{item.label}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
-      <View
-        id="manual-btn"
-        className="manual-card"
-        onClick={() => Taro.navigateTo({ url: '/pages/manual/index' })}
-      >
-        <View className="manual-title">使用手册</View>
-        <View className="manual-desc">了解记录仪使用方法</View>
-      </View>
+      <ParkingCard deviceIds={parkingDeviceIds}></ParkingCard>
 
-      {
-        deviceInfo.brand == 'HUAWEI' ?
-          <View
-            className="huawei-notice-card"
-            onClick={copyUrl}
-          >
-            <View className="huawei-notice-title">🔧 华为用户专用通道</View>
-            <View className="huawei-notice-desc">点击复制网址，用浏览器打开，去进行设备连接，连接后调整设备设置及查看下载设备视频</View>
-            <View className="huawei-notice-tip">📱 推荐使用华为浏览器或Chrome</View>
-          </View> :
-          <View
-            className="manual-card"
-            onClick={copyUrl}
-          >
-            <View className="manual-title">部分手机连接设备失败看这里</View>
-            <View className="manual-desc">
-              <View>无法连接点击这里，复制链接，之后在浏览器打开即可</View>
-              <View>部分手机因为手机系统问题，无法连接设备，需要在浏览器打开链接进行后在网页操作</View>
+      <View className="help-row">
+        <View
+          id="video-tutorial-btn"
+          className="help-card"
+          onClick={previewVideo}
+        >
+          <View className="help-card__thumb">
+            <Image
+              src={postImg}
+              className="thumbnail-image"
+              mode="aspectFill"
+            />
+            <View className="help-card__play">
+              <PlayStart size={16} color="#fff" />
             </View>
           </View>
-      }
+          <View className="help-card__meta">
+            <View className="help-card__title">连接教程</View>
+            <View className="help-card__desc">1 分钟学会连设备</View>
+          </View>
+        </View>
+
+        <View
+          id="manual-btn"
+          className="help-card"
+          onClick={() => Taro.navigateTo({ url: '/pages/manual/index' })}
+        >
+          <View className="help-card__icon">册</View>
+          <View className="help-card__meta">
+            <View className="help-card__title">使用手册</View>
+            <View className="help-card__desc">功能说明与操作指引</View>
+          </View>
+        </View>
+      </View>
 
       <Dialog id="open_wifi">
         <>

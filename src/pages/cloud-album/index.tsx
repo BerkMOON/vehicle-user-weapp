@@ -14,8 +14,21 @@ import { PlayStart, Del } from '@nutui/icons-react-taro'
 import Taro, { useDidShow, useRouter } from '@tarojs/taro'
 import { formatFileSize } from '@/utils/utils'
 import DefaultPng from '@/assets/default.png'
-import { CycleDateCalendarPicker, normalizeToYMD } from './CycleDateCalendarPicker'
-import { CLOUD_ALBUM_PENDING_SN_STORAGE_KEY } from '@/constants/constants'
+import { CycleDateCalendarPicker } from './CycleDateCalendarPicker'
+import {
+  CLOUD_ALBUM_PENDING_SN_STORAGE_KEY,
+  CLOUD_ALBUM_PENDING_TYPE_STORAGE_KEY
+} from '@/constants/constants'
+import { promptDownloadApp } from '@/utils/appPromo'
+import { useMembershipStore } from '@/store/membership'
+import {
+  canPurchaseMembership,
+  formatCloudDaysLabel,
+  getCycleVideoDateOptions,
+  normalizeCycleDateYMD,
+  resolveCloudDaysFromStatus,
+  resolveLevelName
+} from '@/utils/membership'
 
 function formatYMD(d: Date) {
   const y = d.getFullYear()
@@ -33,7 +46,7 @@ const ALL_TYPE_OPTIONS = [
   { text: '视频', value: 'videos' },
 ] as const
 
-const isCloudDevice = (device?: DeviceInfo) => device?.is_cloud_ver === true
+const isCloudDevice = (device?: DeviceInfo) => Boolean(device?.is_cloud_ver)
 
 function mapCycleItemToMedia(item: ItemList, index: number): MediaItem {
   return {
@@ -50,6 +63,21 @@ function mapCycleItemToMedia(item: ItemList, index: number): MediaItem {
 export default function CloudAlbum() {
   const router = useRouter()
   const { isLogin } = useUserStore()
+  const membershipReady = useMembershipStore((s) => s.ready)
+  const membershipInfo = useMembershipStore((s) => s.info)
+  const membership = useMemo(() => {
+    const cloudDays = resolveCloudDaysFromStatus(membershipInfo)
+    return {
+      ready: membershipReady,
+      info: membershipInfo,
+      isActive: !!membershipInfo?.is_active,
+      levelName: resolveLevelName(membershipInfo),
+      cloudDays,
+      canViewCycleVideo: cloudDays > 0,
+      canPurchase: canPurchaseMembership(membershipInfo),
+      cloudDaysLabel: formatCloudDaysLabel(cloudDays)
+    }
+  }, [membershipReady, membershipInfo])
   const devicesRef = useRef<DeviceInfo[]>([])
   const [folders, setFolders] = useState<string[]>([])
   const [mediaList, setMediaList] = useState<MediaItem[]>([])
@@ -69,12 +97,15 @@ export default function CloudAlbum() {
     [devices, selectedDevice]
   )
 
-  const typesOptions = useMemo(() => {
-    if (isCloudDevice(selectedDeviceInfo)) {
-      return [...ALL_TYPE_OPTIONS]
-    }
-    return ALL_TYPE_OPTIONS.filter((o) => o.value !== 'cycle_video')
-  }, [selectedDeviceInfo])
+  /** 行车视频始终可选；非云端设备选中后展示说明，不再从类型列表里隐藏 */
+  const typesOptions = useMemo(() => [...ALL_TYPE_OPTIONS], [])
+
+  const cycleDateOptions = useMemo(
+    () => getCycleVideoDateOptions(membership.cloudDays),
+    [membership.cloudDays]
+  )
+  const canViewCycleVideo = membership.canViewCycleVideo
+  const selectedIsCloudDevice = isCloudDevice(selectedDeviceInfo)
 
   useEffect(() => {
     devicesRef.current = devices
@@ -96,6 +127,27 @@ export default function CloudAlbum() {
     }
   }
 
+  const takePendingType = (): string => {
+    try {
+      const t = Taro.getStorageSync(CLOUD_ALBUM_PENDING_TYPE_STORAGE_KEY)
+      if (typeof t !== 'string' || !t) return ''
+      Taro.removeStorageSync(CLOUD_ALBUM_PENDING_TYPE_STORAGE_KEY)
+      return t
+    } catch {
+      return ''
+    }
+  }
+
+  const applyPendingType = (_list: DeviceInfo[], _preferSn?: string) => {
+    const pendingType = takePendingType()
+    const fromQuery = router.params.type || ''
+    const nextType = pendingType || fromQuery
+    if (!nextType) return
+    if (ALL_TYPE_OPTIONS.some((o) => o.value === nextType)) {
+      setSelectedType(nextType)
+    }
+  }
+
   // 获取文件夹列表
   const fetchFolders = async () => {
     if (!selectedDevice || selectedType === 'cycle_video') return
@@ -103,7 +155,7 @@ export default function CloudAlbum() {
     try {
       const deviceId = devices.find(device => device.sn === selectedDevice)?.device_id
       const res = await CloudAPI.getCloudFolders({
-        deviceId: `eda_hz_${deviceId}`,
+        deviceId,
         type: selectedType
       })
       setFolders(res?.data || [])
@@ -127,6 +179,13 @@ export default function CloudAlbum() {
     const deviceId = devices.find(device => device.sn === selectedDevice)?.device_id
     if (!deviceId) return
 
+    if (selectedType === 'cycle_video' && (!selectedIsCloudDevice || !canViewCycleVideo)) {
+      setMediaList([])
+      setHasMore(false)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     try {
       if (selectedType === 'cycle_video') {
@@ -137,7 +196,7 @@ export default function CloudAlbum() {
           lastItem?.video_path || lastItem?.name || undefined
 
         const res = await CloudAPI.getCycleVideoList({
-          date_str: normalizeToYMD(selectedFolder),
+          date_str: normalizeCycleDateYMD(selectedFolder, membership.cloudDays),
           device_id: deviceId,
           ...(markerPath ? { marker: markerPath } : {})
         })
@@ -149,7 +208,7 @@ export default function CloudAlbum() {
         const res = await CloudAPI.getCloudPhoto({
           nextToken: isForce ? '' : nextToken,
           limit: pageSize,
-          deviceId: `eda_hz_${deviceId}`,
+          deviceId,
           type: selectedType,
           date: selectedFolder
         })
@@ -167,12 +226,19 @@ export default function CloudAlbum() {
   }
 
   useEffect(() => {
+    if (selectedType === 'cycle_video' && (!selectedIsCloudDevice || !canViewCycleVideo)) {
+      setMediaList([])
+      setSelectedFolder('')
+      setHasMore(false)
+      setLoading(false)
+      return
+    }
     if (!selectedFolder) return
     setMediaList([])
     setNextToken('')
     setHasMore(true)
     fetchMediaList(true)
-  }, [selectedFolder, selectedDevice, selectedType])
+  }, [selectedFolder, selectedDevice, selectedType, canViewCycleVideo, membership.cloudDays, selectedIsCloudDevice])
 
   // 获取设备列表
   const fetchDevices = async () => {
@@ -181,8 +247,12 @@ export default function CloudAlbum() {
       const res = await DeviceAPI.list()
       const list = res?.data?.device_list || []
       if (list.length) {
-        setDevices(list)
-        let preferSn = takePendingSnIfInList(list)
+        const normalized = list.map((d) => ({
+          ...d,
+          is_cloud_ver: Boolean(d.is_cloud_ver)
+        }))
+        setDevices(normalized)
+        let preferSn = takePendingSnIfInList(normalized)
         if (!preferSn) {
           const rawSn = router.params.sn ?? router.params.deviceSn
           if (rawSn) {
@@ -194,14 +264,11 @@ export default function CloudAlbum() {
           }
         }
         const picked =
-          preferSn && list.some((d) => d.sn === preferSn)
+          preferSn && normalized.some((d) => d.sn === preferSn)
             ? preferSn
-            : list[0].sn
+            : normalized[0].sn
         setSelectedDevice(picked)
-        const pickedInfo = list.find((d) => d.sn === picked)
-        if (!isCloudDevice(pickedInfo)) {
-          setSelectedType((t) => (t === 'cycle_video' ? 'shutdown' : t))
-        }
+        applyPendingType(normalized, picked)
       } else {
         setDevices([])
       }
@@ -221,16 +288,22 @@ export default function CloudAlbum() {
     if (!list.length) return
     const sn = takePendingSnIfInList(list)
     if (sn) setSelectedDevice(sn)
+    applyPendingType(list, sn || selectedDevice)
   })
 
   useEffect(() => {
     if (!selectedDevice) return
-    if (!isCloudDevice(selectedDeviceInfo) && selectedType === 'cycle_video') {
-      setSelectedType('shutdown')
-      return
-    }
     if (selectedType === 'cycle_video') {
-      setSelectedFolder(formatYMD(new Date()))
+      if (!selectedIsCloudDevice || !canViewCycleVideo) {
+        setSelectedFolder('')
+        setMediaList([])
+        setNextToken('')
+        setHasMore(false)
+        setLoading(false)
+        return
+      }
+      const next = normalizeCycleDateYMD(selectedFolder || formatYMD(new Date()), membership.cloudDays)
+      setSelectedFolder(next)
       setMediaList([])
       setNextToken('')
       setHasMore(true)
@@ -238,12 +311,20 @@ export default function CloudAlbum() {
     }
     setSelectedFolder('')
     fetchFolders()
-  }, [selectedDevice, selectedType, selectedDeviceInfo])
+  }, [selectedDevice, selectedType, selectedDeviceInfo, canViewCycleVideo, membership.cloudDays, selectedIsCloudDevice])
 
   const onScrollToLower = () => {
     if (hasMore && !loading && selectedFolder) {
       fetchMediaList()
     }
+  }
+
+  const tipOpenApp = () => {
+    promptDownloadApp({
+      title: '开通会员',
+      content:
+        '行车视频云回看为会员权益。小程序暂不支持开通，请下载易达安 App，设备兼容更好，iOS 观看也更方便。'
+    })
   }
 
   // 删除照片/视频
@@ -371,9 +452,6 @@ export default function CloudAlbum() {
             onChange={(e) => {
               const device = devices[e.detail.value]
               setSelectedDevice(device.sn)
-              if (!isCloudDevice(device)) {
-                setSelectedType((t) => (t === 'cycle_video' ? 'shutdown' : t))
-              }
             }}
           >
             <View className='picker-item'>
@@ -398,7 +476,17 @@ export default function CloudAlbum() {
         </Picker>
 
         {selectedType === 'cycle_video' ? (
-          <CycleDateCalendarPicker value={selectedFolder} onChange={setSelectedFolder} />
+          selectedIsCloudDevice && canViewCycleVideo ? (
+            <CycleDateCalendarPicker
+              value={selectedFolder}
+              cloudDays={membership.cloudDays}
+              onChange={setSelectedFolder}
+            />
+          ) : (
+            <View className='picker-item picker-item--disabled'>
+              <Text>{selectedIsCloudDevice ? '需会员权益' : '需云端设备'}</Text>
+            </View>
+          )
         ) : (
           <Picker
             mode='selector'
@@ -416,13 +504,44 @@ export default function CloudAlbum() {
         )}
       </View>
 
+      {selectedType === 'cycle_video' && selectedIsCloudDevice && canViewCycleVideo && cycleDateOptions.length > 0 && (
+        <View className='cycle-range-tip'>
+          当前可回看：{membership.cloudDaysLabel}
+        </View>
+      )}
+
       <ScrollView
         className='scroll-info'
         scrollY
         onScrollToLower={onScrollToLower}
       >
         <View className='scroll-content'>
-          {mediaList.length === 0 ? (
+          {selectedType === 'cycle_video' && !selectedIsCloudDevice ? (
+            <View className='member-gate'>
+              <Empty
+                className='empty'
+                description='当前设备不支持云端行车视频'
+                image={emptyImg}
+              />
+              <View className='member-gate__desc'>
+                行车视频云回看仅支持云端版本设备。请确认设备固件为云端版，或在首页查看设备是否带「云端」标识。
+              </View>
+            </View>
+          ) : selectedType === 'cycle_video' && !canViewCycleVideo ? (
+            <View className='member-gate'>
+              <Empty
+                className='empty'
+                description='行车视频云回看为会员权益'
+                image={emptyImg}
+              />
+              <View className='member-gate__desc'>
+                小程序内暂不支持开通会员，请下载易达安 App 开通后即可按权益回看。
+              </View>
+              <View className='member-gate__btn' onClick={tipOpenApp}>
+                复制 App 下载链接
+              </View>
+            </View>
+          ) : mediaList.length === 0 ? (
             !loading && <Empty
               className='empty'
               description={

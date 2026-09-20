@@ -3,15 +3,36 @@ import './index.scss'
 import Taro from '@tarojs/taro'
 import { ArrowSize8, Receipt, User, ArrowExchange, Video } from '@nutui/icons-react-taro'
 import { Avatar, Popup, Button } from '@nutui/nutui-react-taro'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useUserStore } from '@/store/user'
+import { useMembershipStore } from '@/store/membership'
+import {
+  canPurchaseMembership,
+  formatCloudDaysLabel,
+  resolveCloudDaysFromStatus,
+  resolveLevelName
+} from '@/utils/membership'
 import { useRef } from 'react'
+import AppPromoBanner from '@/components/AppPromoBanner'
+import { promptDownloadApp } from '@/utils/appPromo'
 import { useAuth } from '@/hooks/useAuth'  // 添加这行导入
 import { UserAPI } from '@/request/useApi'
 import { FileType } from '@/request/useApi/typings.d'
 
 function Mine() {
   const { userInfo: { phone } } = useUserStore()
+  const membershipReady = useMembershipStore((s) => s.ready)
+  const membershipInfo = useMembershipStore((s) => s.info)
+  const membership = useMemo(() => {
+    const cloudDays = resolveCloudDaysFromStatus(membershipInfo)
+    return {
+      ready: membershipReady,
+      levelName: resolveLevelName(membershipInfo),
+      cloudDaysLabel: formatCloudDaysLabel(cloudDays),
+      canPurchase: canPurchaseMembership(membershipInfo),
+      cloudDays
+    }
+  }, [membershipReady, membershipInfo])
   const { handleGetPhoneNumber } = useAuth()  // 添加这行
   const [showQRCode, setShowQRCode] = useState(false)
   const componentRef = useRef()
@@ -116,8 +137,23 @@ function Mine() {
             background="#f0f0f0"
             size="large"
           />
-          <View className="phone-number">
-            {phone ? phone : '未登录'}
+          <View className="user-meta">
+            <View className="phone-number">
+              {phone ? phone : '未登录'}
+            </View>
+            {phone && membership.ready && (
+              <View
+                className="member-status"
+                onClick={() => {
+                  promptDownloadApp({
+                    title: membership.levelName,
+                    content: `行车视频云回看：${membership.cloudDaysLabel}\n\n开通/续费请使用易达安 App。`
+                  })
+                }}
+              >
+                {membership.levelName} · 行车视频{membership.cloudDaysLabel}
+              </View>
+            )}
           </View>
         </View>
         <Button
@@ -130,35 +166,7 @@ function Mine() {
         </Button>
       </View>
 
-      {/* <View className="section-title">我的</View>
-      {/* 菜单列表 */}
-      {/* <View className="menu-list">
-        <View className="menu-item"
-          onClick={() => {
-            Taro.navigateTo({
-              url: '/pages/coupons/index'
-            })
-          }}
-        >
-          <View className="menu-item-left">
-            <Voucher className="menu-icon" size={16} />
-            <Text>优惠券</Text>
-          </View>
-          <Text className="arrow">
-            <ArrowSize8 size={14} />
-          </Text>
-        </View>
-
-        <View className="menu-item" onClick={handleGenerateQRCode}>
-          <View className="menu-item-left">
-            <QrCode className="menu-icon" size={16} />
-            <Text>生成二维码</Text>
-          </View>
-          <Text className="arrow">
-            <ArrowSize8 size={14} />
-          </Text>
-        </View>
-      </View>  */}
+      <AppPromoBanner compact />
 
       <View className="section-title">使用说明</View>
 

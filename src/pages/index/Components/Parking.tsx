@@ -1,6 +1,6 @@
 import { ArrowRight, Notice } from "@nutui/icons-react-taro"
 import { View, Text } from "@tarojs/components"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import './Parking.scss'
 import { DeviceAPI } from "@/request/deviceApi"
 import Taro from '@tarojs/taro'
@@ -13,16 +13,21 @@ export const ParkingCard = (props: {
   const { deviceIds } = props
   const [warningInfo, setWarningInfo] = useState<ParkingInfo[]>([])
   const [loading, setLoading] = useState(true)
+  // 父组件每次 render 都会 new 一个 map 数组，用序列化值做依赖避免死循环
+  const deviceIdsKey = useMemo(() => deviceIds.join(','), [deviceIds])
 
   useEffect(() => {
-    if (deviceIds.length === 0) {
+    const ids = deviceIdsKey ? deviceIdsKey.split(',') : []
+    if (ids.length === 0) {
+      setWarningInfo((prev) => (prev.length === 0 ? prev : []))
+      setLoading((prev) => (prev ? false : prev))
       return
     }
 
+    let cancelled = false
     setLoading(true)
 
-    // 创建所有设备的请求数组
-    const requests = deviceIds.map(deviceId =>
+    const requests = ids.map(deviceId =>
       DeviceAPI.parkList({
         page: 1,
         limit: 10,
@@ -30,19 +35,16 @@ export const ParkingCard = (props: {
       })
     )
 
-    // 并行请求所有设备的数据
     Promise.all(requests)
       .then(responses => {
-        // 处理所有设备的响应
+        if (cancelled) return
         const allWarnings = responses.reduce((acc, res) => {
           if (res?.data && res.data.record_list.length > 0) {
-            // 获取当前设备的最新日期
             const firstDate = new Date(res.data.record_list[0].occur_time).toDateString()
 
-            // 过滤出该设备同一天的数据
             const filteredList = res.data.record_list
               .filter(item => new Date(item.occur_time).toDateString() === firstDate)
-              .slice(0, 3) // 每个设备最多显示3条
+              .slice(0, 3)
               .map(item => ({
                 ...item,
                 sn: res.data.sn,
@@ -54,20 +56,23 @@ export const ParkingCard = (props: {
           return acc
         }, [])
 
-        // 按时间排序，最新的在前面
         const sortedWarnings = allWarnings.sort((a, b) =>
           new Date(b.occur_time).getTime() - new Date(a.occur_time).getTime()
         )
 
-        // 只取最新的6条记录
         setWarningInfo(sortedWarnings.slice(0, 6))
         setLoading(false)
       })
       .catch(error => {
+        if (cancelled) return
         console.error('获取停车监控数据失败：', error)
         setLoading(false)
       })
-  }, [deviceIds])
+
+    return () => {
+      cancelled = true
+    }
+  }, [deviceIdsKey])
 
   const handleViewMore = (id) => {
     // 跳转到详情页时，默认展示第一个设备的数据
@@ -160,7 +165,7 @@ export const ParkingCard = (props: {
           </View>
         </View>
         {
-          deviceIds.length > 0 ?
+          deviceIdsKey ?
             warningInfo.length === 0 ? (
               <View className="empty-state"> {
                 loading ? <Loading type="spinner">加载中</Loading> :

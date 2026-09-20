@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useUserStore } from '@/store/user'
+import { useMembershipStore } from '@/store/membership'
 import { UserAPI } from '@/request/useApi'
 import { generateNonce, generateSignature, getSecondTimestamp } from '@/utils/utils'
 import Taro from '@tarojs/taro'
@@ -9,13 +10,15 @@ let isInitialized = false
 let isLoginRetrying = false  // 添加重试标记
 
 export const useAuth = () => {
-  const { setUserInfo, setLoginStatus, userInfo } = useUserStore()  // 添加 setLoginStatus
+  const { setUserInfo, setLoginStatus, userInfo } = useUserStore()
+  const setMembershipFromSelfInfo = useMembershipStore((s) => s.setFromSelfInfo)
+  const clearMembership = useMembershipStore((s) => s.clear)
 
   const handleWxLogin = async () => {
     if (isLoginRetrying) return
     try {
       isLoginRetrying = true
-      setLoginStatus('pending')  // 设置登录状态为处理中
+      setLoginStatus('pending')
       const { code } = await Taro.login()
       const nonce = generateNonce()
       const timestamp = getSecondTimestamp()
@@ -28,6 +31,7 @@ export const useAuth = () => {
         timestamp,
       })
       if (response?.data.response_status.code !== SuccessCode) {
+        setLoginStatus('error')
         Taro.showToast({
           title: '登录失败，请稍后重试',
           icon: 'none'
@@ -38,16 +42,18 @@ export const useAuth = () => {
       if (response?.header['Set-Cookie']) {
         Taro.setStorageSync('cookies', response?.header['Set-Cookie'])
       }
+      // 先释放标记，否则 checkLoginStatus 会因 isLoginRetrying 直接 return
       isLoginRetrying = false
       await checkLoginStatus()
     } catch (error) {
-      isLoginRetrying = false
-      setLoginStatus('error')  // 设置登录状态为错误
+      setLoginStatus('error')
       console.error('登录失败：', error)
       Taro.showToast({
         title: '登录失败，请稍后重试',
         icon: 'none'
       })
+    } finally {
+      isLoginRetrying = false
     }
   }
 
@@ -56,18 +62,21 @@ export const useAuth = () => {
     try {
       const response = await UserAPI.getUserInfo()
       if (response?.response_status.code === SuccessCode) {
-        const userInfo = response.data
+        const info = response.data
         setUserInfo({
-          phone: userInfo?.phone,
-          openId: userInfo?.open_id,
-          deviceInfo: userInfo?.device_info
+          phone: info?.phone,
+          openId: info?.open_id,
+          deviceInfo: info?.device_info
         })
-        setLoginStatus('success')  // 设置登录状态为成功
+        setMembershipFromSelfInfo(info?.membership, info?.phone)
+        setLoginStatus('success')
       } else {
+        clearMembership()
         await handleWxLogin()
       }
     } catch (error) {
       console.error('获取用户信息失败：', error)
+      clearMembership()
       await handleWxLogin()
     }
   }

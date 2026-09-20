@@ -1,51 +1,26 @@
 import { View, Text, Picker } from '@tarojs/components'
-import dayjs from 'dayjs'
+import { getCycleVideoDateOptions, normalizeCycleDateYMD } from '@/utils/membership'
 
 type Props = {
   value: string
+  cloudDays: number
   onChange: (dateStr: string) => void
 }
 
-function formatToday() {
-  return dayjs().format('YYYY-MM-DD')
-}
-
-function formatYesterday() {
-  return dayjs().subtract(1, 'day').format('YYYY-MM-DD')
-}
-
-/** 行车视频仅允许今天、昨天 */
-export function getCycleVideoDateOptions() {
-  const today = formatToday()
-  const yesterday = formatYesterday()
-  return [
-    { label: `今天 (${today})`, value: today },
-    { label: `昨天 (${yesterday})`, value: yesterday }
-  ]
-}
-
-/** 统一为接口所需 YYYY-MM-DD，且限制在今天/昨天 */
-export function normalizeToYMD(raw: unknown): string {
-  const today = formatToday()
-  const yesterday = formatYesterday()
-  if (raw == null || raw === '') {
-    return today
-  }
-  const s = String(raw).trim()
-  const matched = s.match(/(\d{4}-\d{2}-\d{2})/)
-  const ymd = matched ? matched[1] : (dayjs(s).isValid() ? dayjs(s).format('YYYY-MM-DD') : today)
-  if (ymd === today || ymd === yesterday) {
-    return ymd
-  }
-  return today
-}
-
 /**
- * 行车视频选日期：仅可选今天、昨天（近 24 小时录像）
+ * 行车视频选日期：可选范围由会员权益 cycle_video_days 决定
  */
-export function CycleDateCalendarPicker({ value, onChange }: Props) {
-  const options = getCycleVideoDateOptions()
-  const normalized = normalizeToYMD(value)
+export function CycleDateCalendarPicker({ value, cloudDays, onChange }: Props) {
+  const options = getCycleVideoDateOptions(cloudDays)
+  if (!options.length) {
+    return (
+      <View className='picker-item picker-item--disabled'>
+        <Text>暂无可用日期</Text>
+      </View>
+    )
+  }
+
+  const normalized = normalizeCycleDateYMD(value, cloudDays)
   const pickerIndex = Math.max(
     0,
     options.findIndex((o) => o.value === normalized)
@@ -58,7 +33,7 @@ export function CycleDateCalendarPicker({ value, onChange }: Props) {
       value={pickerIndex}
       onChange={(e) => {
         const idx = Number(e.detail.value)
-        onChange(options[idx]?.value ?? formatToday())
+        onChange(options[idx]?.value ?? options[0].value)
       }}
     >
       <View className='picker-item'>
@@ -67,3 +42,5 @@ export function CycleDateCalendarPicker({ value, onChange }: Props) {
     </Picker>
   )
 }
+
+export { getCycleVideoDateOptions, normalizeCycleDateYMD }
